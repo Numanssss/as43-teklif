@@ -51,10 +51,12 @@ if not st.session_state['logged_in']:
                 st.error("Hatalı kullanıcı adı veya şifre!")
     st.stop()
 
-# --- ANA UYGULAMA ---
+# --- ANA UYGULAMA (Sol Menü Logolu & Şık Tasarım) ---
 st.sidebar.markdown("""
-    <div style='background-color: #0e1117; padding: 10px; text-align: center; border-radius: 8px;'>
-        <img src='logo.png' style='width: 100%; max-width: 180px; display: block; margin: 0 auto;'/>
+    <div style='text-align: center; padding: 10px 0;'>
+        <h1 style='color: #d97706; margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 2px;'>AS 43</h1>
+        <h3 style='color: #ffffff; margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 1px;'>ASANSÖR</h3>
+        <p style='color: #888; font-size: 10px; margin: 4px 0 0 0; text-transform: uppercase;'>Lazer & Metal Paneli</p>
     </div>
     <hr style='margin: 10px 0 15px 0; border-color: #333;'>
 """, unsafe_allow_html=True)
