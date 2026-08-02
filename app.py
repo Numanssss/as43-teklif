@@ -55,12 +55,24 @@ def get_transparent_logo_base64():
 # --- KURUMSAL BRANDING & PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* Global sayfa arka planı ve Android/Mobil Kaydırma Düzeltmesi */
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
+    /* Global sayfa arka planı */
+    html, body {
+        background-color: #0f172a;
+        color: #f8fafc;
+        overflow: hidden !important;
+        height: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Android/Mobil Kaydırma Düzeltmesi */
+    [data-testid="stAppViewContainer"], [data-testid="stApp"] {
         background-color: #0f172a;
         color: #f8fafc;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
+        height: 100% !important;
     }
     
     /* Üst Kurumsal Çizgi (Premium Turuncu) */
@@ -763,7 +775,7 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
             <p><b>Hammadde Maliyeti:</b> {hammadde_maliyeti_eur:.2f} EUR ({brut_agirlik:.1f} kg)</p>
             <p><b>Operasyonlar (Lazer+Büküm+İşçilik):</b> {(lazer_maliyeti_eur + bukum_maliyeti_eur + iscilik_maliyeti_eur):.2f} EUR</p>
             <p><b>Toplam Net Maliyet:</b> {toplam_maliyet_eur:.2f} EUR</p>
-            <p><b>Liste Satış Fiyatı (Kâr Dahil):</b> {liste_fiyati_eur:.2f} EUR</p>
+            <p><b>Liste Satış Fiyati (Kâr Dahil):</b> {liste_fiyati_eur:.2f} EUR</p>
             <p><b>İskonto Tutarı (%{iskonto_orani}):</b> -{iskonto_tutari_eur:.2f} EUR</p>
             <h2 style='color:#22c55e; margin-bottom:5px;'>GENEL TOPLAM: {genel_toplam_eur:.2f} EUR</h2>
             <p style='color:#94a3b8; font-size:0.9rem;'>TL Karşılığı (Kur: {active_rate:.2f}): <b>{genel_toplam_try:,.2f} TL</b></p>
@@ -858,103 +870,4 @@ elif secilen_modul == "📋 Geçmiş Teklifler & Takip":
                 st.rerun()
         
         with col_btn2:
-            st.markdown("<p style='color:#ef4444; font-weight:bold; margin-bottom: 2px; margin-top: -10px;'>⚠️ Tehlikeli Alan</p>", unsafe_allow_html=True)
-            confirm_sil = st.checkbox("Seçili teklifi silmeyi onaylıyorum.", key="confirm_delete_check")
-            if st.button("🗑️ Teklifi Kalıcı Olarak Sil", disabled=not confirm_sil, use_container_width=True):
-                df_teklifler = df_teklifler[df_teklifler["Teklif_ID"].astype(str) != str(secilen_teklif_id)]
-                df_teklifler.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
-                st.success("Teklif başarıyla silindi!")
-                st.rerun()
-
-# ========================================================
-# 3. MODÜL: SİSTEM AYARLARI & SAC FİYATLARI
-# ========================================================
-elif secilen_modul == "⚙️ Sistem Ayarları & Sac Fiyatları":
-    st.markdown("<div class='main-title'>Sistem Ayarları ve Sac Birim Fiyatları</div>", unsafe_allow_html=True)
-    st.markdown("<div class='main-subtitle'>Hammadde Birim Maliyetleri ve Kur Yönetimi</div>", unsafe_allow_html=True)
-    
-    st.subheader("💶 Döviz Kuru Ayarları")
-    col_cur1, col_cur2 = st.columns(2)
-    with col_cur1:
-        kur_modu = st.radio("Döviz Kuru Modu:", ["Canlı", "Manuel"], index=0 if st.session_state["exchange_mode"] == "Canlı" else 1)
-        st.session_state["exchange_mode"] = kur_modu
-    with col_cur2:
-        if kur_modu == "Manuel":
-            manuel_kur = st.number_input("Manuel EUR/TRY Kuru:", min_value=1.0, value=float(st.session_state["custom_rate"]), step=0.1)
-            st.session_state["custom_rate"] = manuel_kur
-        else:
-            st.info(f"Canlı kur aktif (Open ER-API). Güncel kur: {st.session_state['live_rate']:.4f} TL")
-            
-    st.markdown("---")
-    st.subheader("🛠️ Sac Malzeme Birim Fiyatları (EUR / kg)")
-    
-    edited_sac_df = st.data_editor(df_sac_fiyatlari, use_container_width=True, num_rows="dynamic")
-    if st.button("Sac Fiyatlarını Kaydet"):
-        edited_sac_df.to_csv(FILE_SAC_FIYATLARI, index=False, encoding='utf-8-sig')
-        st.success("Sac birim fiyatları başarıyla güncellendi!")
-        st.rerun()
-
-# ========================================================
-# 4. MODÜL: STOK YÖNETİMİ
-# ========================================================
-elif secilen_modul == "📦 Stok Yönetimi":
-    st.markdown("<div class='main-title'>Depo Envanteri ve Malzeme Takip Konsolu</div>", unsafe_allow_html=True)
-    st.markdown("<div class='main-subtitle'>Depo Envanteri ve Malzeme Takip Konsolu</div>", unsafe_allow_html=True)
-    
-    edited_stok_df = st.data_editor(df_stok, use_container_width=True, num_rows="dynamic")
-    if st.button("Stok Envanterini Güncelle"):
-        edited_stok_df.to_csv(FILE_STOK, index=False, encoding='utf-8-sig')
-        st.success("Stok verileri başarıyla kaydedildi!")
-        st.rerun()
-
-# ========================================================
-# 5. MODÜL: FİNANS & MUHASEBE RAPORU
-# ========================================================
-elif secilen_modul == "📊 Finans & Muhasebe Raporu":
-    st.markdown("<div class='main-title'>Finans ve Muhasebe Raporlama Konsolu</div>", unsafe_allow_html=True)
-    st.markdown("<div class='main-subtitle'>Gelir, Gider, Kasa ve Nakit Akışı Yönetimi</div>", unsafe_allow_html=True)
-    
-    tab_fin1, tab_fin2 = st.tabs(["💸 Gider Yönetimi", "💰 Gelir Yönetimi"])
-    
-    with tab_fin1:
-        st.subheader("Gider Ekle")
-        with st.form("gider_form"):
-            g_tarih = st.date_input("Gider Tarihi", datetime.date.today())
-            g_kat = st.selectbox("Kategori", ["Hammadde", "Enerji", "Maaşlar", "Kira", "Bakım-Onarım", "Diğer"])
-            g_tutar = st.number_input("Tutar (TL)", min_value=0.0, value=1000.0)
-            g_aciklama = st.text_input("Açıklama")
-            g_submit = st.form_submit_button("Gideri Kaydet")
-            
-            if g_submit:
-                yeni_gider = pd.DataFrame([[g_tarih, g_kat, "Genel", g_tutar, g_aciklama]], columns=["Tarih", "Kategori", "Alt_Kategori", "Tutar_TL", "Açıklama"])
-                df_gider_updated = pd.concat([df_gider, yeni_gider], ignore_index=True)
-                df_gider_updated.to_csv(FILE_GIDERLER, index=False, encoding='utf-8-sig')
-                st.success("Gider eklendi!")
-                st.rerun()
-                
-        st.subheader("Mevcut Giderler")
-        if not df_gider.empty:
-            st.dataframe(df_gider, use_container_width=True)
-            st.metric("Toplam Gider", f"{df_gider['Tutar_TL'].sum():,.2f} TL")
-            
-    with tab_fin2:
-        st.subheader("Gelir Ekle")
-        with st.form("gelir_form"):
-            gel_tarih = st.date_input("Gelir Tarihi", datetime.date.today())
-            gel_musteri = st.text_input("Müşteri")
-            gel_yontem = st.selectbox("Ödeme Yöntemi", ["Nakit", "Banka Havalesi", "Çek", "Kredi Kartı"])
-            gel_tutar = st.number_input("Tutar (TL)", min_value=0.0, value=5000.0)
-            gel_aciklama = st.text_input("Gelir Açıklaması")
-            gel_submit = st.form_submit_button("Geliri Kaydet")
-            
-            if gel_submit:
-                yeni_gelir = pd.DataFrame([[gel_tarih, gel_musteri, gel_yontem, gel_tutar, "", gel_aciklama]], columns=["Tarih", "Müşteri", "Ödeme_Yöntemi", "Tutar_TL", "Çek_Vadesi", "Açıklama"])
-                df_gelir_updated = pd.concat([df_gelir, yeni_gelir], ignore_index=True)
-                df_gelir_updated.to_csv(FILE_GELIRLER, index=False, encoding='utf-8-sig')
-                st.success("Gelir eklendi!")
-                st.rerun()
-                
-        st.subheader("Mevcut Gelirler")
-        if not df_gelir.empty:
-            st.dataframe(df_gelir, use_container_width=True)
-            st.metric("Toplam Gelir", f"{df_gelir['Tutar_TL'].sum():,.2f} TL")
+            st.markdown("<p style='color:#ef444
