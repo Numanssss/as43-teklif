@@ -392,7 +392,10 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.set_xy(110, pdf.get_y())
     pdf.cell(80, 4, "____________________________", ln=True, align='C')
     
-    return pdf.output()
+    out = pdf.output(dest='S')
+    if isinstance(out, str):
+        return out.encode('latin1')
+    return bytes(out)
 
 DEFAULT_HEADERS_ASANSOR = ["Asansör_ID", "Konum", "Durum (Etiket)", "Son_Bakım_Notları", "Bekleyen_Eksikler", "Adres"]
 
