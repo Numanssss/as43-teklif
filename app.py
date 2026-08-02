@@ -909,10 +909,10 @@ def generate_asansor_imalat_pdf(data, images):
     if isinstance(out, str):
         return out.encode('latin1')
     return bytes(out)
- 
- DEFAULT_HEADERS_ASANSOR = ["Asansör_ID", "Konum", "Durum (Etiket)", "Son_Bakım_Notları", "Bekleyen_Eksikler", "Adres"]
- 
- def init_databases():
+
+DEFAULT_HEADERS_ASANSOR = ["Asansör_ID", "Konum", "Durum (Etiket)", "Son_Bakım_Notları", "Bekleyen_Eksikler", "Adres"]
+
+def init_databases():
      if not os.path.exists(FILE_ASANSOR):
          df = pd.DataFrame(columns=DEFAULT_HEADERS_ASANSOR)
          df.to_csv(FILE_ASANSOR, index=False, encoding='utf-8-sig')
