@@ -24,7 +24,7 @@ import base64
 # --- SAYFA YAPILANDIRMASI ---
 st.set_page_config(page_title="AS43 Grup | Metal & Asansör ERP", layout="wide", page_icon="💠")
 
-# --- KURUMSAL BRANDING & PREMIUM CSS (Canlı ve Net Logo Görünümü) ---
+# --- KURUMSAL BRANDING & PREMIUM CSS (Beyaz Arka Planı Yok Eden Kesin Çözüm) ---
 st.markdown("""
     <style>
     /* Global sayfa arka planı */
@@ -113,21 +113,21 @@ st.markdown("""
         box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }
     
-    /* Canlı ve Parlak Logo Taşıyıcı Stili */
+    /* Beyaz Arka Planı Tamamen Yok Eden Logo Stili */
     .logo-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 5px;
+        padding: 10px;
         margin-bottom: 5px;
         background: transparent !important;
     }
     .logo-img {
         max-width: 200px;
         background: transparent !important;
-        /* Multiply kaldırıldı; logonun soluk kalmaması için parlaklık, kontrast ve canlılık artırıldı */
-        filter: brightness(1.4) contrast(1.3) saturate(1.2);
-        drop-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+        /* mix-blend-mode: screen beyaz arka planı tamamen şeffaflaştırır */
+        mix-blend-mode: screen;
+        filter: brightness(1.2) contrast(1.1);
     }
     
     /* Özelleştirilmiş Buton Stili (Turuncu Gradyan) */
