@@ -847,13 +847,24 @@ elif secilen_modul == "📋 Geçmiş Teklifler & Takip":
         with col_op3:
             yeni_odeme = st.selectbox("Ödeme Durumu:", ["Ödeme Bekleniyor", "Ödeme Alındı", "Ödeme Gecikti"], index=0 if row_sel["Odeme_Durumu"] not in ["Ödeme Bekleniyor", "Ödeme Alındı", "Ödeme Gecikti"] else ["Ödeme Bekleniyor", "Ödeme Alındı", "Ödeme Gecikti"].index(row_sel["Odeme_Durumu"]))
             
-        if st.button("Durumu Güncelle"):
-            df_teklifler.loc[df_teklifler["Teklif_ID"].astype(str) == str(secilen_teklif_id), "Durum"] = yeni_durum
-            df_teklifler.loc[df_teklifler["Teklif_ID"].astype(str) == str(secilen_teklif_id), "Iletim_Durumu"] = yeni_iletim
-            df_teklifler.loc[df_teklifler["Teklif_ID"].astype(str) == str(secilen_teklif_id), "Odeme_Durumu"] = yeni_odeme
-            df_teklifler.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
-            st.success("Teklif durumu güncellendi!")
-            st.rerun()
+        col_btn1, col_btn2 = st.columns([1, 1])
+        with col_btn1:
+            if st.button("Durumu Güncelle", use_container_width=True):
+                df_teklifler.loc[df_teklifler["Teklif_ID"].astype(str) == str(secilen_teklif_id), "Durum"] = yeni_durum
+                df_teklifler.loc[df_teklifler["Teklif_ID"].astype(str) == str(secilen_teklif_id), "Iletim_Durumu"] = yeni_iletim
+                df_teklifler.loc[df_teklifler["Teklif_ID"].astype(str) == str(secilen_teklif_id), "Odeme_Durumu"] = yeni_odeme
+                df_teklifler.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
+                st.success("Teklif durumu güncellendi!")
+                st.rerun()
+        
+        with col_btn2:
+            st.markdown("<p style='color:#ef4444; font-weight:bold; margin-bottom: 2px; margin-top: -10px;'>⚠️ Tehlikeli Alan</p>", unsafe_allow_html=True)
+            confirm_sil = st.checkbox("Seçili teklifi silmeyi onaylıyorum.", key="confirm_delete_check")
+            if st.button("🗑️ Teklifi Kalıcı Olarak Sil", disabled=not confirm_sil, use_container_width=True):
+                df_teklifler = df_teklifler[df_teklifler["Teklif_ID"].astype(str) != str(secilen_teklif_id)]
+                df_teklifler.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
+                st.success("Teklif başarıyla silindi!")
+                st.rerun()
 
 # ========================================================
 # 3. MODÜL: SİSTEM AYARLARI & SAC FİYATLARI
