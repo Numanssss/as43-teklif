@@ -55,6 +55,7 @@ if not st.session_state['logged_in']:
     st.stop()
 
 # --- ANA UYGULAMA ---
+
 st.sidebar.markdown("""
     <div style='text-align: center; padding: 10px 0;'>
         <h2 style='color: #d97706; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 1px;'>AS43 ASANSÖR</h2>
