@@ -771,6 +771,20 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                 "Odeme_Durumu": "Ödeme Bekleniyor"
             }
             
+            yeni_teklif = {
+            "Teklif No": teklif_no,
+            "Tarih": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
+            "Hazırlayan": st.session_state.get("username", "Bilinmiyor"),
+            "Müşteri": musteri_adi,
+            "Şablon": sablon,
+            "Sac Cinsi": secilen_sac,
+            "Sac Kalınlığı": sac_kalinligi,
+            "Net Ağırlık (kg)": net_agirlik,
+            "Toplam Maliyet (€)": toplam_maliyet_eur,
+            "Liste Fiyatı (€)": liste_fiyati_eur,
+            "Genel Toplam (€)": genel_toplam_eur
+        }
+
         df_yeni = pd.DataFrame([yeni_teklif])
         df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
         df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
