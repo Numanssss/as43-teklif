@@ -27,13 +27,24 @@ if not st.session_state['logged_in']:
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        kullanici = st.text_input("Kullanıcı Adı")
-        sifre = st.text_input("Şifre", type="password")
+       # Yetkili Kullanıcılar Listesi
+        yetkili_kullanicilar = {
+            "mehmet": "as43mehmet",
+            "metin": "as43metin",
+            "mesut": "as43mesut",
+            "sena": "as43sena",
+            "ünal": "as43unal",
+            "unal": "as43unal",
+            "ayça": "as43ayca",
+            "ayca": "as43ayca",
+            "onur": "as43onur",
+            "admin": "as43admin"
+        }
 
         if st.button("Giriş Yap"):
-            if kullanici == "ahmet" and sifre == "as432026":
+            if kullanici in yetkili_kullanicilar and yetkili_kullanicilar[kullanici] == sifre:
                 st.session_state['logged_in'] = True
-                st.session_state['user_name'] = "Ahmet"
+                st.session_state['user_name'] = kullanici.capitalize()
                 st.rerun()
             else:
                 st.error("Hatalı kullanıcı adı veya şifre!")
