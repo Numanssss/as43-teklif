@@ -22,16 +22,13 @@ if 'logged_in' not in st.session_state:
 # Giriş Ekranı
 if not st.session_state['logged_in']:
     st.markdown("<h2 style='text-align: center;'>AS43 Asansör Lazer & Metal</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: gray;'>Yetkili Teklif ve Yönetim Paneli</p>",
-                unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray;'>Yetkili Teklif ve Yönetim Paneli</p>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # Kullanıcı Adı ve Şifre Alanları (Eksik olan kısımlar eklendi)
         kullanici = st.text_input("Kullanıcı Adı").strip().lower()
         sifre = st.text_input("Şifre", type="password")
 
-        # Yetkili Kullanıcılar Listesi
         yetkili_kullanicilar = {
             "mehmet": "as43mehmet",
             "metin": "as43metin",
@@ -55,19 +52,14 @@ if not st.session_state['logged_in']:
     st.stop()
 
 # --- ANA UYGULAMA ---
-
+st.sidebar.image("logo.png", use_container_width=True)
 st.sidebar.markdown("""
-    <div style='text-align: center; padding: 10px 0;'>
-        <h2 style='color: #d97706; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 1px;'>AS43 ASANSÖR</h2>
-        <p style='color: #aaa; font-size: 11px; margin: 3px 0 0 0;'>Lazer & Metal Paneli</p>
-    </div>
-    <hr style='margin: 10px 0 15px 0; border-color: #333;'>
+    <hr style='margin: 5px 0 15px 0; border-color: #333;'>
 """, unsafe_allow_html=True)
 
 st.sidebar.write(f"Hoş geldiniz, **{st.session_state['user_name']}**")
 secim = st.sidebar.radio("Sayfalar", ["Yeni Teklif Oluştur", "Teklif Geçmişi & Takip", "Sac & Malzeme Fiyatları"])
 
-# Anlık Euro Kuru Çekme
 def get_euro_rate():
     try:
         res = requests.get("https://api.exchangerate-api.com/v4/latest/EUR", timeout=3)
@@ -91,8 +83,7 @@ if secim == "Yeni Teklif Oluştur":
             "Sedye Kabini (1000 kg)",
             "Yük Karkası (Özel Ölçü)"
         ])
-        sac_kalinligi = st.selectbox("Sac Kalınlığı ve Türü",
-                                     ["1.2 mm DKP", "1.5 mm DKP", "2.0 mm DKP", "1.5 mm Galvaniz"])
+        sac_kalinligi = st.selectbox("Sac Kalınlığı ve Türü", ["1.2 mm DKP", "1.5 mm DKP", "2.0 mm DKP", "1.5 mm Galvaniz"])
         sac_kg = st.number_input("Harcanacak Net Sac Miktarı (kg)", value=180.0)
         fire_orani = st.slider("Fire Oranı (%)", 0, 20, 10)
 
@@ -130,21 +121,16 @@ if secim == "Yeni Teklif Oluştur":
 
 elif secim == "Teklif Geçmişi & Takip":
     st.markdown("<div class='main-header'>📋 Geçmiş Teklifler ve Durum Yönetimi</div>", unsafe_allow_html=True)
-
     df_gecmis = pd.DataFrame([
-        {"Teklif No": "TKF-2026-001", "Müşteri": "Asansör Vizyon Ltd.", "Tarih": "01.08.2026 Cmt", "Yetkili": "Ahmet",
-         "Tutar (EUR)": 1648.94, "Durum": "Onaylandı", "Açıklama": "-"},
-        {"Teklif No": "TKF-2026-002", "Müşteri": "Mega Asansör A.Ş.", "Tarih": "01.08.2026 Cmt", "Yetkili": "Mehmet",
-         "Tutar (EUR)": 3450.00, "Durum": "Beklemede", "Açıklama": "Müşteri onay bekleniyor"},
-        {"Teklif No": "TKF-2026-003", "Müşteri": "Zirve Asansör", "Tarih": "01.08.2026 Cmt", "Yetkili": "Sena",
-         "Tutar (EUR)": 2100.00, "Durum": "Reddedildi", "Açıklama": "Fiyat yüksek bulundu"}
+        {"Teklif No": "TKF-2026-001", "Müşteri": "Asansör Vizyon Ltd.", "Tarih": "01.08.2026 Cmt", "Yetkili": "Ahmet", "Tutar (EUR)": 1648.94, "Durum": "Onaylandı", "Açıklama": "-"},
+        {"Teklif No": "TKF-2026-002", "Müşteri": "Mega Asansör A.Ş.", "Tarih": "01.08.2026 Cmt", "Yetkili": "Mehmet", "Tutar (EUR)": 3450.00, "Durum": "Beklemede", "Açıklama": "Müşteri onay bekleniyor"},
+        {"Teklif No": "TKF-2026-003", "Müşteri": "Zirve Asansör", "Tarih": "01.08.2026 Cmt", "Yetkili": "Sena", "Tutar (EUR)": 2100.00, "Durum": "Reddedildi", "Açıklama": "Fiyat yüksek bulundu"}
     ])
     st.dataframe(df_gecmis, use_container_width=True)
 
 elif secim == "Sac & Malzeme Fiyatları":
     st.markdown("<div class='main-header'>📦 Sac Fiyat Listesi (Excel Veritabanı)</div>", unsafe_allow_html=True)
     st.write("Aşağıdaki fiyatlar arka plandaki Excel/Google Sheets kaynağından anlık olarak çekilmektedir.")
-
     df_sac = pd.DataFrame([
         {"Sac Kalınlığı": "1.2 mm DKP", "Tür": "DKP Sac", "Birim Fiyat (EUR/kg)": 2.15, "Fire (%)": 10},
         {"Sac Kalınlığı": "1.5 mm DKP", "Tür": "DKP Sac", "Birim Fiyat (EUR/kg)": 2.05, "Fire (%)": 10},
