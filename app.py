@@ -159,7 +159,7 @@ st.markdown("""
         border: 2px solid #F59E0B;
         border-radius: 14px;
         padding: 1.5rem;
-        box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
     
     /* Şeffaf Logo Stili */
@@ -526,10 +526,10 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
         ]
         right_specs = [
             ("Kabin Modeli", clean(detay_data.get("kabin_modeli", ""))),
-            ("Kabin Kaplaması", clean(detay_data.get("kabin_kaplama", ""))),
+            ("Kabin Kaplamasi", clean(detay_data.get("kabin_kaplama", ""))),
             ("Doseme Tipi", clean(detay_data.get("doseme_tipi", ""))),
-            ("Aksesuar Kaplaması", clean(detay_data.get("aksesuar_kaplama", ""))),
-            ("Kapi Giris Kaplaması", clean(detay_data.get("kapi_giris_kaplama", ""))),
+            ("Aksesuar Kaplamasi", clean(detay_data.get("aksesuar_kaplama", ""))),
+            ("Kapi Giris Kaplamasi", clean(detay_data.get("kapi_giris_kaplama", ""))),
             ("Tavan Modeli", clean(detay_data.get("tavan_modeli", ""))),
             ("Taban Modeli", clean(detay_data.get("taban_modeli", ""))),
             ("Ayna Yeri ve Olcusu", clean(detay_data.get("ayna_detay", "")))
@@ -716,10 +716,10 @@ def generate_asansor_imalat_pdf(data, images):
     ]
     right_specs = [
         ("Kabin Modeli", clean(data.get("kabin_modeli", ""))),
-        ("Kabin Kaplaması", clean(data.get("kabin_kaplama", ""))),
+        ("Kabin Kaplamasi", clean(data.get("kabin_kaplama", ""))),
         ("Doseme Tipi", clean(data.get("doseme_tipi", ""))),
-        ("Aksesuar Kaplaması", clean(data.get("aksesuar_kaplama", ""))),
-        ("Kapi Giris Kaplaması", clean(data.get("kapi_giris_kaplama", ""))),
+        ("Aksesuar Kaplamasi", clean(data.get("aksesuar_kaplama", ""))),
+        ("Kapi Giris Kaplamasi", clean(data.get("kapi_giris_kaplama", ""))),
         ("Tavan Modeli", clean(data.get("tavan_modeli", ""))),
         ("Taban Modeli", clean(data.get("taban_modeli", ""))),
         ("Ayna Yeri ve Olcusu", clean(data.get("ayna_detay", ""))),
@@ -1660,7 +1660,7 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
         
     with col_e2:
         st.subheader("🚪 Kapı, Kumanda ve Diğer Bilgiler")
-        kapi_gen_yuk = st.text_input("Kapı Genişlik x Yükseklik:", value="150 X 210")
+        kapi_gen_yuk = st.text_input("Kapı Giriş Genişlik x Yükseklik:", value="150 X 210")
         kabin_kapi_adedi = st.text_input("Kabin Kapı Adedi (örn: TEK GİRİŞ):", value="TEK GİRİŞ")
         kapi_model = st.text_input("Kapı Modeli (Kabin):", value="ÇARPMA")
         kat_kapi_adedi = st.text_input("Kat Kapı Adedi:", value="YOK")
