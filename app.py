@@ -20,11 +20,36 @@ import urllib.parse
 import json
 import hashlib
 import base64
+from PIL import Image
+import io
 
 # --- SAYFA YAPILANDIRMASI ---
 st.set_page_config(page_title="AS43 Grup | Metal & Asansör ERP", layout="wide", page_icon="💠")
 
-# --- KURUMSAL BRANDING & PREMIUM CSS (Beyaz Arka Planı Yok Eden Kesin Çözüm) ---
+# --- LOGO ARKA PLANINI ŞEFFAFLAŞTIRAN YARDIMCI FONKSİYON ---
+def get_transparent_logo_base64():
+    if not os.path.exists("logo.png"):
+        return None
+    try:
+        img = Image.open("logo.png").convert("RGBA")
+        datas = img.getdata()
+        new_data = []
+        # Beyaz ve yakın tonlarını şeffafa çevir
+        for item in datas:
+            if item[0] > 240 and item[1] > 240 and item[2] > 240:
+                new_data.append((255, 255, 255, 0))
+            else:
+                new_data.append(item)
+        img.putdata(new_data)
+        
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode()
+    except Exception:
+        with open("logo.png", "rb") as f:
+            return base64.b64encode(f.read()).decode()
+
+# --- KURUMSAL BRANDING & PREMIUM CSS ---
 st.markdown("""
     <style>
     /* Global sayfa arka planı */
@@ -113,7 +138,7 @@ st.markdown("""
         box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }
     
-    /* Beyaz Arka Planı Tamamen Yok Eden Logo Stili */
+    /* Şeffaf Logo Stili */
     .logo-container {
         display: flex;
         justify-content: center;
@@ -125,9 +150,6 @@ st.markdown("""
     .logo-img {
         max-width: 200px;
         background: transparent !important;
-        /* mix-blend-mode: screen beyaz arka planı tamamen şeffaflaştırır */
-        mix-blend-mode: screen;
-        filter: brightness(1.2) contrast(1.1);
     }
     
     /* Özelleştirilmiş Buton Stili (Turuncu Gradyan) */
@@ -146,23 +168,6 @@ st.markdown("""
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 15px -3px rgba(245, 158, 11, 0.5) !important;
     }
-    
-    /* Durum Etiketleri */
-    .badge {
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 0.85rem;
-        display: inline-block;
-        text-align: center;
-    }
-    .badge-onay { background-color: #15803d; color: #f8fafc; }
-    .badge-bekle { background-color: #a16207; color: #f8fafc; }
-    .badge-red { background-color: #b91c1c; color: #f8fafc; }
-    
-    .badge-odeme-alindi { background-color: #1d4ed8; color: #f8fafc; }
-    .badge-odeme-bekliyor { background-color: #4b5563; color: #f8fafc; }
-    .badge-odeme-gecikti { background-color: #b91c1c; color: #f8fafc; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -434,8 +439,9 @@ if "id" in st.query_params:
     scan_id = st.query_params["id"]
     
     st.markdown("<div class='logo-container'>", unsafe_allow_html=True)
-    if os.path.exists("logo.png"):
-        st.markdown(f"<img src='data:image/png;base64,{urllib.parse.quote(open('logo.png', 'rb').read())}' class='logo-img'>", unsafe_allow_html=True)
+    logo_b64_scan = get_transparent_logo_base64()
+    if logo_b64_scan:
+        st.markdown(f"<img src='data:image/png;base64,{logo_b64_scan}' class='logo-img'>", unsafe_allow_html=True)
     else:
         st.markdown("<h2 style='color:#F59E0B;'>AS43 ASANSÖR</h2>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -517,13 +523,12 @@ if not st.session_state["authenticated"]:
     col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
     with col_l2:
         with st.form("login_form"):
-            # GİRİŞ EKRANI LOGOSU (logo.png)
-            if os.path.exists("logo.png"):
-                with open("logo.png", "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read()).decode()
+            # GİRİŞ EKRANI ŞEFFAF LOGOSU
+            logo_b64_login = get_transparent_logo_base64()
+            if logo_b64_login:
                 st.markdown(f"""
                     <div class="logo-container">
-                        <img src="data:image/png;base64,{encoded_string}" class="logo-img" />
+                        <img src="data:image/png;base64,{logo_b64_login}" class="logo-img" />
                     </div>
                 """, unsafe_allow_html=True)
             else:
@@ -587,13 +592,12 @@ active_rate = st.session_state["live_rate"] if st.session_state["exchange_mode"]
 # --- SOL MENÜ (SIDEBAR) BÖLÜMÜ ---
 st.sidebar.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
 
-# SOL MENÜ ÜST KISIM LOGO (logo.png)
-if os.path.exists("logo.png"):
-    with open("logo.png", "rb") as image_file:
-        encoded_string_sb = base64.b64encode(image_file.read()).decode()
+# SOL MENÜ ÜST KISIM ŞEFFAF LOGO
+logo_b64_sb = get_transparent_logo_base64()
+if logo_b64_sb:
     st.sidebar.markdown(f"""
         <div class="logo-container">
-            <img src="data:image/png;base64,{encoded_string_sb}" class="logo-img" style="max-width:160px;" />
+            <img src="data:image/png;base64,{logo_b64_sb}" class="logo-img" style="max-width:160px;" />
         </div>
     """, unsafe_allow_html=True)
 else:
