@@ -55,31 +55,27 @@ def get_transparent_logo_base64():
 # --- KURUMSAL BRANDING & PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* Global sayfa arka planı ve Tek-Kanal Doğal Kaydırma */
+    /* Global sayfa arka planı ve Pull-to-Refresh Engelleme */
     html, body {
         background-color: #0f172a;
         color: #f8fafc;
         margin: 0 !important;
         padding: 0 !important;
-        height: auto !important;
-        min-height: 100% !important;
-        overflow-y: auto !important; /* Tüm kaydırma bu ana kanaldan yapılır */
-        overflow-x: hidden !important;
-        overscroll-behavior-y: contain !important; /* Pull-to-refresh yenilemeyi engeller */
-        scroll-behavior: smooth !important; /* Pürüzsüz ve akıcı kaydırma */
+        overscroll-behavior-y: contain !important; /* Sayfa yenilemeyi tamamen engeller */
+        overscroll-behavior-x: none !important;
     }
     
-    /* İç Konteynerlerin Kilitlerini Kırma (Nested Scroll İptali) & GPU Hızlandırma */
-    #root, 
-    [data-testid="stAppViewContainer"], 
-    [data-testid="stApp"], 
-    .main, 
-    [data-testid="stAppViewBlockContainer"] {
-        height: auto !important;
-        min-height: 100% !important;
-        overflow: visible !important; /* İç kaydırma çubuklarını iptal edip body'ye aktarır */
-        overscroll-behavior-y: contain !important;
-        /* GPU Donanım Hızlandırması (Arayüz Takılmalarını Engeller) */
+    /* Mobil Kaydırma ve Stabilizasyon */
+    [data-testid="stAppViewContainer"], [data-testid="stApp"] {
+        background-color: #0f172a;
+        color: #f8fafc;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior-y: contain !important; /* Alt container yenilemesini engeller */
+    }
+    
+    /* GPU Donanım Hızlandırması (Arayüz Takılmalarını ve Kaydırma Kilitlenmelerini Engeller) */
+    .main .block-container {
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
         will-change: transform;
