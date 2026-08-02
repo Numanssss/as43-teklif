@@ -220,7 +220,7 @@ FILE_GELIRLER = "metal_gelirler.csv"
 FILE_SAC_FIYATLARI = "sac_fiyatlari.csv"
 FILE_TEKLIFLER = "teklifler.csv"
 
-def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_kalinligi, net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur, bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi, sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, liste_fiyati_try, active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur):
+def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_kalinligi, net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur, bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi, sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, liste_fiyati_try, active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur, detay_data=None, images_paths=None):
     from fpdf import FPDF
     
     class PDF(FPDF):
@@ -393,6 +393,175 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.set_xy(110, pdf.get_y())
     pdf.cell(80, 4, "____________________________", ln=True, align='C')
     
+    if detay_data and images_paths:
+        pdf.add_page()
+        pdf.set_draw_color(0, 0, 0)
+        pdf.set_line_width(0.3)
+        pdf.rect(10, 10, 190, 22)
+        pdf.line(75, 10, 75, 32)
+        
+        if os.path.exists("logo.png"):
+            pdf.image("logo.png", 12, 13, 58)
+        else:
+            pdf.set_font("Helvetica", "B", 14)
+            pdf.set_xy(12, 18)
+            pdf.cell(58, 8, "AS43 GRUP", align="C")
+            
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.set_xy(75, 15)
+        pdf.cell(70, 12, "ASANSOR IMALAT TEKLIF EKI", align="C")
+        
+        pdf.line(145, 10, 145, 32)
+        pdf.line(145, 15.5, 200, 15.5)
+        pdf.line(145, 21, 200, 21)
+        pdf.line(145, 26.5, 200, 26.5)
+        pdf.line(175, 10, 175, 21)
+        pdf.line(175, 26.5, 175, 32)
+        
+        pdf.set_font("Helvetica", "B", 6)
+        pdf.set_xy(146, 11)
+        pdf.cell(28, 4, "DOKUMAN NO")
+        pdf.set_xy(176, 11)
+        pdf.cell(24, 4, "REVIZYON NO")
+        pdf.set_font("Helvetica", "", 7)
+        pdf.set_xy(163, 11)
+        pdf.cell(10, 4, "ONY-FRM-026")
+        pdf.set_xy(193, 11)
+        pdf.cell(10, 4, "1")
+        
+        pdf.set_font("Helvetica", "B", 6)
+        pdf.set_xy(146, 16.5)
+        pdf.cell(28, 4, "YAYIN TARIHI")
+        pdf.set_font("Helvetica", "", 7)
+        pdf.set_xy(163, 16.5)
+        pdf.cell(10, 4, "15.12.2022")
+        
+        pdf.set_font("Helvetica", "B", 6)
+        pdf.set_xy(146, 22)
+        pdf.cell(50, 4, "REVIZYON TARIHI")
+        pdf.set_font("Helvetica", "", 7)
+        pdf.set_xy(170, 22)
+        pdf.cell(20, 4, "01.06.2023")
+        
+        pdf.set_font("Helvetica", "B", 6)
+        pdf.set_xy(146, 27.5)
+        pdf.cell(28, 4, "SAYFA NO")
+        pdf.set_font("Helvetica", "", 7)
+        pdf.set_xy(176, 27.5)
+        pdf.cell(24, 4, "2 / 2")
+        
+        pdf.set_fill_color(245, 158, 11)
+        pdf.rect(10, 32, 190, 5, 'F')
+        pdf.rect(10, 32, 190, 5)
+        pdf.line(57.5, 32, 57.5, 37)
+        pdf.line(105, 32, 105, 37)
+        pdf.line(152.5, 32, 152.5, 37)
+        
+        pdf.set_font("Helvetica", "B", 7)
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_xy(10, 32)
+        pdf.cell(47.5, 5, "TABAN MODELI RESMI", align="C")
+        pdf.set_xy(57.5, 32)
+        pdf.cell(47.5, 5, "KABIN MODELI RESMI", align="C")
+        pdf.set_xy(105, 32)
+        pdf.cell(47.5, 5, "TAVAN MODELI RESMI", align="C")
+        pdf.set_xy(152.5, 32)
+        pdf.cell(47.5, 5, "KUYU KESITI / OZEL", align="C")
+        pdf.set_text_color(0, 0, 0)
+        
+        pdf.rect(10, 37, 190, 30)
+        pdf.line(57.5, 37, 57.5, 67)
+        pdf.line(105, 37, 105, 67)
+        pdf.line(152.5, 37, 152.5, 67)
+        
+        image_keys = ["taban", "kabin", "tavan", "kuyu"]
+        for idx, key in enumerate(image_keys):
+            img_path = images_paths.get(key)
+            x_start = 10 + (idx * 47.5)
+            if img_path and os.path.exists(img_path):
+                try:
+                    pdf.image(img_path, x_start + 2, 38, 43.5, 28)
+                except Exception:
+                    pass
+                
+        pdf.rect(10, 67, 190, 6)
+        pdf.line(57.5, 67, 57.5, 73)
+        pdf.line(105, 67, 105, 73)
+        pdf.line(152.5, 67, 152.5, 73)
+        pdf.set_font("Helvetica", "B", 6.5)
+        
+        pdf.set_xy(10, 68)
+        pdf.cell(47.5, 4, clean(f"Doseme: {detay_data.get('taban_modeli', '')}"), align="C")
+        pdf.set_xy(57.5, 68)
+        pdf.cell(47.5, 4, clean(f"Kabin: {detay_data.get('dim_kabin', 'Olcu Yok')}"), align="C")
+        pdf.set_xy(105, 68)
+        pdf.cell(47.5, 4, clean(f"Tavan: {detay_data.get('tavan_modeli', '')}"), align="C")
+        pdf.set_xy(152.5, 68)
+        pdf.cell(47.5, 4, clean(f"Kuyu: {detay_data.get('dim_kuyu', 'Olcu Yok')}"), align="C")
+        
+        pdf.set_fill_color(245, 158, 11)
+        pdf.rect(10, 75, 190, 5, 'F')
+        pdf.rect(10, 75, 190, 5)
+        pdf.set_font("Helvetica", "B", 8)
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_xy(10, 75)
+        pdf.cell(190, 5, "TEKNIK ASANSOR SPECIFIKASYONLARI", align="C")
+        pdf.set_text_color(0, 0, 0)
+        
+        pdf.rect(10, 80, 190, 45)
+        pdf.line(105, 80, 105, 125)
+        for i in range(1, 9):
+            y_line = 80 + (i * 5)
+            pdf.line(10, y_line, 200, y_line)
+            
+        left_specs = [
+            ("Kapasite", clean(detay_data.get("kapasite", "")) + " kg"),
+            ("Hiz", clean(detay_data.get("hiz", "")) + " m/s"),
+            ("Durak", clean(detay_data.get("durak", "")) + " Ad."),
+            ("Giris Sayisi", clean(detay_data.get("giris_sayisi", ""))),
+            ("Aski Tipi", clean(detay_data.get("aski_tipi", ""))),
+            ("Kuyu Tipi", clean(detay_data.get("kuyu_tipi", ""))),
+            ("Ana Ray Olcusu", clean(detay_data.get("ana_ray", ""))),
+            ("Ana Ray Arasi Mesafesi", clean(detay_data.get("ana_ray_arasi", "")))
+        ]
+        right_specs = [
+            ("Kabin Modeli", clean(detay_data.get("kabin_modeli", ""))),
+            ("Kabin Kaplaması", clean(detay_data.get("kabin_kaplama", ""))),
+            ("Doseme Tipi", clean(detay_data.get("doseme_tipi", ""))),
+            ("Aksesuar Kaplaması", clean(detay_data.get("aksesuar_kaplama", ""))),
+            ("Kapi Giris Kaplaması", clean(detay_data.get("kapi_giris_kaplama", ""))),
+            ("Tavan Modeli", clean(detay_data.get("tavan_modeli", ""))),
+            ("Taban Modeli", clean(detay_data.get("taban_modeli", ""))),
+            ("Ayna Yeri ve Olcusu", clean(detay_data.get("ayna_detay", "")))
+        ]
+        
+        pdf.set_font("Helvetica", "B", 7)
+        for idx, (label, val) in enumerate(left_specs):
+            y_pos = 81 + (idx * 5)
+            pdf.set_xy(12, y_pos)
+            pdf.cell(45, 4, label + ":")
+            pdf.set_font("Helvetica", "", 7)
+            pdf.set_xy(57, y_pos)
+            pdf.cell(45, 4, str(val))
+            pdf.set_font("Helvetica", "B", 7)
+            
+        for idx, (label, val) in enumerate(right_specs):
+            y_pos = 81 + (idx * 5)
+            pdf.set_xy(107, y_pos)
+            pdf.cell(45, 4, label + ":")
+            pdf.set_font("Helvetica", "", 7)
+            pdf.set_xy(152, y_pos)
+            pdf.cell(45, 4, str(val))
+            pdf.set_font("Helvetica", "B", 7)
+            
+        pdf.rect(10, 126, 190, 20)
+        pdf.set_font("Helvetica", "B", 7)
+        pdf.set_xy(12, 127)
+        pdf.cell(10, 4, "NOT:")
+        pdf.set_font("Helvetica", "", 6.5)
+        pdf.set_xy(22, 127)
+        pdf.multi_cell(176, 3, clean(detay_data.get("not", "")))
+        
     out = pdf.output(dest='S')
     if isinstance(out, str):
         return out.encode('latin1')
@@ -1216,68 +1385,109 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
     col_w1, col_w2 = st.columns([1, 1.1])
     
     with col_w1:
-        st.subheader("📋 Teklif Parametreleri")
+        tab_calc, tab_tech = st.tabs(["💰 Maliyet & Fiyat Hesaplama", "📐 Teknik Detaylar & Görseller (Resimli Teklif Eki)"])
         
-        musteri_adi = st.text_input("Müşteri / Firma Adı:", value="Özsoy Asansör A.Ş.")
-        
-        sablon = st.selectbox(
-            "Kabin / Karkas Şablonu Seçin:",
-            [
-                "Standart Kabin (Paslanmaz)",
-                "Lüks Paslanmaz Kabin (Desenli/Aynalı)",
-                "Panoramik Kabin",
-                "Yük & Sedye Kabini",
-                "Ağırlık Karkası",
-                "Süspansiyon Karkası",
-                "Özel Tasarım Metal İmalat"
-            ]
-        )
-        
-        st.markdown("##### 🛠️ Hammadde Bilgileri")
-        sac_tipleri = df_sac_fiyatlari["Malzeme_Tipi"].tolist()
-        secilen_sac = st.selectbox("Sac Malzeme Tipi:", sac_tipleri)
-        
-        sac_fiyat_row = df_sac_fiyatlari[df_sac_fiyatlari["Malzeme_Tipi"] == secilen_sac]
-        birim_fiyat_eur_kg = float(sac_fiyat_row["Birim_Fiyat_EUR_kg"].iloc[0])
-        
-        st.caption(f"ℹ️ Veritabanı Birim Fiyatı: **{birim_fiyat_eur_kg:.2f} EUR/kg**")
-        
-        col_inp1, col_inp2, col_inp3 = st.columns(3)
-        with col_inp1:
-            sac_kalinligi = st.selectbox("Sac Kalınlığı (mm):", [1.0, 1.2, 1.5, 2.0, 3.0, 4.0, 5.0], index=2)
-        with col_inp2:
-            net_agirlik = st.number_input("Net Ağırlık (kg):", min_value=0.1, value=120.0, step=1.0)
-        with col_inp3:
-            fire_orani = st.number_input("Fire Oranı (%):", min_value=0.0, max_value=100.0, value=15.0, step=1.0)
+        with tab_calc:
+            st.subheader("📋 Teklif Parametreleri")
+            musteri_adi = st.text_input("Müşteri / Firma Adı:", value="Özsoy Asansör A.Ş.")
             
-        st.markdown("##### ⚡ Operasyon Süreleri (Dakika)")
-        col_time1, col_time2, col_time3 = st.columns(3)
-        with col_time1:
-            lazer_suresi = st.number_input("Lazer Kesim Süresi (dk):", min_value=0.0, value=45.0, step=5.0)
-        with col_time2:
-            bukum_suresi = st.number_input("Büküm Süresi (dk):", min_value=0.0, value=30.0, step=5.0)
-        with col_time3:
-            iscilik_suresi = st.number_input("Montaj/İşçilik Süresi (dk):", min_value=0.0, value=60.0, step=10.0)
+            sablon = st.selectbox(
+                "Kabin / Karkas Şablonu Seçin:",
+                [
+                    "Standart Kabin (Paslanmaz)",
+                    "Lüks Paslanmaz Kabin (Desenli/Aynalı)",
+                    "Panoramik Kabin",
+                    "Yük & Sedye Kabini",
+                    "Ağırlık Karkası",
+                    "Süspansiyon Karkası",
+                    "Özel Tasarım Metal İmalat"
+                ]
+            )
             
-        st.markdown("##### 💶 Birim Dakika Maliyetleri (EUR / Dakika)")
-        col_cost1, col_cost2, col_cost3 = st.columns(3)
-        with col_cost1:
-            lazer_dakika_maliyet = st.number_input("Lazer / Dakika (EUR):", min_value=0.00, value=1.33, step=0.05, format="%.4f")
-        with col_cost2:
-            bukum_dakika_maliyet = st.number_input("Büküm / Dakika (EUR):", min_value=0.00, value=0.66, step=0.05, format="%.4f")
-        with col_cost3:
-            iscilik_dakika_maliyet = st.number_input("İşçilik / Dakika (EUR):", min_value=0.00, value=0.25, step=0.05, format="%.4f")
+            st.markdown("##### 🛠️ Hammadde Bilgileri")
+            sac_tipleri = df_sac_fiyatlari["Malzeme_Tipi"].tolist()
+            secilen_sac = st.selectbox("Sac Malzeme Tipi:", sac_tipleri)
             
-        st.markdown("##### 📈 Kar, İskonto & KDV")
-        col_m1, col_m2, col_m3 = st.columns(3)
-        with col_m1:
-            sabit_gider_payi = st.number_input("Sabit Gider Payı (%):", min_value=0, max_value=100, value=15, step=1)
-        with col_m2:
-            kar_marji = st.number_input("Hedef Kar Marjı (%):", min_value=0, max_value=1000, value=25, step=1)
-        with col_m3:
-            iskonto_orani = st.number_input("İskonto Oranı (%):", min_value=0, max_value=100, value=10, step=1)
+            sac_fiyat_row = df_sac_fiyatlari[df_sac_fiyatlari["Malzeme_Tipi"] == secilen_sac]
+            birim_fiyat_eur_kg = float(sac_fiyat_row["Birim_Fiyat_EUR_kg"].iloc[0])
             
-        kdv_orani = st.selectbox("KDV Oranı (%):", [0, 10, 20], index=2)
+            st.caption(f"ℹ️ Veritabanı Birim Fiyatı: **{birim_fiyat_eur_kg:.2f} EUR/kg**")
+            
+            col_inp1, col_inp2, col_inp3 = st.columns(3)
+            with col_inp1:
+                sac_kalinligi = st.selectbox("Sac Kalınlığı (mm):", [1.0, 1.2, 1.5, 2.0, 3.0, 4.0, 5.0], index=2)
+            with col_inp2:
+                net_agirlik = st.number_input("Net Ağırlık (kg):", min_value=0.1, value=120.0, step=1.0)
+            with col_inp3:
+                fire_orani = st.number_input("Fire Oranı (%):", min_value=0.0, max_value=100.0, value=15.0, step=1.0)
+                
+            st.markdown("##### ⚡ Operasyon Süreleri (Dakika)")
+            col_time1, col_time2, col_time3 = st.columns(3)
+            with col_time1:
+                lazer_suresi = st.number_input("Lazer Kesim Süresi (dk):", min_value=0.0, value=45.0, step=5.0)
+            with col_time2:
+                bukum_suresi = st.number_input("Büküm Süresi (dk):", min_value=0.0, value=30.0, step=5.0)
+            with col_time3:
+                iscilik_suresi = st.number_input("Montaj/İşçilik Süresi (dk):", min_value=0.0, value=60.0, step=10.0)
+                
+            st.markdown("##### 💶 Birim Dakika Maliyetleri (EUR / Dakika)")
+            col_cost1, col_cost2, col_cost3 = st.columns(3)
+            with col_cost1:
+                lazer_dakika_maliyet = st.number_input("Lazer / Dakika (EUR):", min_value=0.00, value=1.33, step=0.05, format="%.4f")
+            with col_cost2:
+                bukum_dakika_maliyet = st.number_input("Büküm / Dakika (EUR):", min_value=0.00, value=0.66, step=0.05, format="%.4f")
+            with col_cost3:
+                iscilik_dakika_maliyet = st.number_input("İşçilik / Dakika (EUR):", min_value=0.00, value=0.25, step=0.05, format="%.4f")
+                
+            st.markdown("##### 📈 Kar, İskonto & KDV")
+            col_m1, col_m2, col_m3 = st.columns(3)
+            with col_m1:
+                sabit_gider_payi = st.number_input("Sabit Gider Payı (%):", min_value=0, max_value=100, value=15, step=1)
+            with col_m2:
+                kar_marji = st.number_input("Hedef Kar Marjı (%):", min_value=0, max_value=1000, value=25, step=1)
+            with col_m3:
+                iskonto_orani = st.number_input("İskonto Oranı (%):", min_value=0, max_value=100, value=10, step=1)
+                
+            kdv_orani = st.selectbox("KDV Oranı (%):", [0, 10, 20], index=2)
+
+        with tab_tech:
+            st.subheader("📐 Teknik Görsel ve Detay Eki (İsteğe Bağlı)")
+            st.info("Bu alanları doldurursanız teklif PDF'inize otomatik olarak resimli ve ölçülü 2. sayfa eklenecektir.")
+            
+            t_kapasite = st.text_input("Kapasite (kg):", value="450", key="t_kapasite")
+            t_hiz = st.text_input("Hız (m/s):", value="YOK", key="t_hiz")
+            t_durak = st.text_input("Durak Adedi:", value="0", key="t_durak")
+            t_giris = st.text_input("Giriş Sayısı:", value="TEK GİRİŞ", key="t_giris")
+            t_aski = st.text_input("Askı Tipi:", value="1/2", key="t_aski")
+            t_kuyu = st.text_input("Kuyu Tipi:", value="BETON", key="t_kuyu")
+            t_ray = st.text_input("Ana Ray Ölçüsü:", value="YOK", key="t_ray")
+            t_ray_arasi = st.text_input("Ana Ray Arası Mesafesi:", value="HİDROLİK L KARKAS ARKADA", key="t_ray_arasi")
+            
+            st.markdown("---")
+            t_model = st.text_input("Kabin Modeli:", value="ONY 2232", key="t_model")
+            t_kaplama = st.text_input("Kabin Kaplaması:", value="304 SATİNE PASL", key="t_kaplama")
+            t_doseme = st.text_input("Döşeme Tipi:", value="DİKEY", key="t_doseme")
+            t_aksesuar = st.text_input("Aksesuar Kaplaması:", value="304 SATİNE PASL", key="t_aksesuar")
+            t_kapi_giris = st.text_input("Kapı Giriş Kaplaması:", value="304 SATİNE PASL", key="t_kapi_giris")
+            t_tavan = st.text_input("Tavan Modeli:", value="T-189", key="t_tavan")
+            t_taban = st.text_input("Taban Modeli:", value="ANTİBAKTERİYEL+SUNTA", key="t_taban")
+            t_ayna = st.text_input("Ayna Yeri ve Ölçüsü:", value="YERDEN 30 CM SÜPER AYNA PASL (DAR OLSUN)", key="t_ayna")
+            
+            st.markdown("---")
+            st.subheader("🖼️ Görsel Yüklemeleri & Alt Ölçüler")
+            t_file_taban = st.file_uploader("Taban Resmi:", type=["png", "jpg", "jpeg"], key="t_up_taban")
+            t_dim_taban = st.text_input("Taban Ölçü Bilgisi:", value="Antibakteriyel Sunta", key="t_in_dim_taban")
+            
+            t_file_kabin = st.file_uploader("Kabin Resmi:", type=["png", "jpg", "jpeg"], key="t_up_kabin")
+            t_dim_kabin = st.text_input("Kabin Ölçü Bilgisi (Genişlik x Derinlik):", value="150 X 85 cm", key="t_in_dim_kabin")
+            
+            t_file_tavan = st.file_uploader("Tavan Resmi:", type=["png", "jpg", "jpeg"], key="t_up_tavan")
+            t_dim_tavan = st.text_input("Tavan Ölçü Bilgisi:", value="T-189 Model", key="t_in_dim_tavan")
+            
+            t_file_kuyu = st.file_uploader("Kuyu/Özel Çizim Resmi:", type=["png", "jpg", "jpeg"], key="t_up_kuyu")
+            t_dim_kuyu = st.text_input("Kuyu Ölçü Bilgisi (Kuyu Genişlik x Derinlik):", value="170 X 124 cm", key="t_in_dim_kuyu")
+            
+            t_not = st.text_area("Özel Açıklama / Notlar:", value="HİDROLİK ASANSÖR SADECE KABİN KOVASI YAPILACAKTIR. 150 CM GENİŞLİK 85 CM DERİNLİK OLACAKTIR.", key="t_not")
 
     with col_w2:
         st.subheader("📊 Maliyet ve Teklif Analizi")
@@ -1343,16 +1553,49 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
             df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
             df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
             
+            # Görsel ve Detayları Geçici Olarak Kaydetme
+            images_paths_tech = {}
+            for k, f in [("taban", t_file_taban), ("kabin", t_file_kabin), ("tavan", t_file_tavan), ("kuyu", t_file_kuyu)]:
+                if f:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+                        tmp.write(f.getvalue())
+                        images_paths_tech[k] = tmp.name
+                else:
+                    images_paths_tech[k] = None
+                    
+            pdf_data_tech = {
+                "kapasite": t_kapasite,
+                "hiz": t_hiz,
+                "durak": t_durak,
+                "giris_sayisi": t_giris,
+                "aski_tipi": t_aski,
+                "kuyu_tipi": t_kuyu,
+                "ana_ray": t_ray,
+                "ana_ray_arasi": t_ray_arasi,
+                "kabin_modeli": t_model,
+                "kabin_kaplama": t_kaplama,
+                "doseme_tipi": t_doseme,
+                "aksesuar_kaplama": t_aksesuar,
+                "kapi_giris_kaplama": t_kapi_giris,
+                "tavan_modeli": t_tavan,
+                "taban_modeli": t_taban,
+                "ayna_detay": t_ayna,
+                "dim_kabin": t_dim_kabin,
+                "dim_kuyu": t_dim_kuyu,
+                "not": t_not
+            }
+            
             pdf_bytes = generate_pdf(
                 teklif_no, st.session_state["username"], musteri_adi, sablon, secilen_sac, sac_kalinligi,
                 net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur,
                 bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi,
                 sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, (liste_fiyati_eur * active_rate),
-                active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur
+                active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur,
+                detay_data=pdf_data_tech, images_paths=images_paths_tech
             )
             
             st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
-             
+            
             def clean_name(t):
                 if not t: return ""
                 t = str(t)
@@ -1415,7 +1658,7 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
         kasnak_olculeri = st.text_input("Kasnak Ölçüleri:", value="YOK")
         seperator = st.text_input("Seperatör (K. Ağırlık):", value="YOK")
         
-    with col_e2:
+     with col_e2:
         st.subheader("🚪 Kapı, Kumanda ve Diğer Bilgiler")
         kapi_gen_yuk = st.text_input("Kapı Genişlik x Yükseklik:", value="150 X 210")
         kabin_kapi_adedi = st.text_input("Kabin Kapı Adedi (örn: TEK GİRİŞ):", value="TEK GİRİŞ")
