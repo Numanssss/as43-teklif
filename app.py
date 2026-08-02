@@ -11,15 +11,15 @@ try:
 except Exception:
     pass
 
+import os
+import base64
 import streamlit as st
 import pandas as pd
-import os
 import datetime
 import urllib.request
 import urllib.parse
 import json
 import hashlib
-import base64
 from PIL import Image
 import io
 
@@ -46,16 +46,21 @@ def get_transparent_logo_base64():
         img.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode()
     except Exception:
-        with open("logo.png", "rb") as f:
-            return base64.b64encode(f.read()).decode()
+        try:
+            with open("logo.png", "rb") as f:
+                return base64.b64encode(f.read()).decode()
+        except Exception:
+            return None
 
 # --- KURUMSAL BRANDING & PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* Global sayfa arka planı */
-    .stApp {
+    /* Global sayfa arka planı ve Android/Mobil Kaydırma Düzeltmesi */
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
         background-color: #0f172a;
         color: #f8fafc;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
     }
     
     /* Üst Kurumsal Çizgi (Premium Turuncu) */
@@ -168,6 +173,23 @@ st.markdown("""
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 15px -3px rgba(245, 158, 11, 0.5) !important;
     }
+    
+    /* Durum Etiketleri */
+    .badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 0.85rem;
+        display: inline-block;
+        text-align: center;
+    }
+    .badge-onay { background-color: #15803d; color: #f8fafc; }
+    .badge-bekle { background-color: #a16207; color: #f8fafc; }
+    .badge-red { background-color: #b91c1c; color: #f8fafc; }
+    
+    .badge-odeme-alindi { background-color: #1d4ed8; color: #f8fafc; }
+    .badge-odeme-bekliyor { background-color: #4b5563; color: #f8fafc; }
+    .badge-odeme-gecikti { background-color: #b91c1c; color: #f8fafc; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -427,12 +449,15 @@ except Exception as e:
     st.error(f"Veritabanı yükleme hatası: {e}")
     st.stop()
 
+# Eksik sütun düzeltmeleri
 if "Iletim_Durumu" not in df_teklifler.columns:
     df_teklifler["Iletim_Durumu"] = "Gönderilmedi"
 if "Odeme_Durumu" not in df_teklifler.columns:
     df_teklifler["Odeme_Durumu"] = "Ödeme Bekleniyor"
 if "Hazirlayan" not in df_teklifler.columns:
     df_teklifler["Hazirlayan"] = "Bilinmiyor"
+if "Durum" not in df_teklifler.columns:
+    df_teklifler["Durum"] = "Bekliyor"
 
 # --- 📱 MOBİL QR TARAMA SİMÜLATÖRÜ ---
 if "id" in st.query_params:
@@ -447,29 +472,23 @@ if "id" in st.query_params:
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown(f"<div class='main-title'>📱 Mobil QR Tarama Servisi</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='main-subtitle'>{scan_id} Asansör Durum ve Bakım Raporu</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='main-subtitle'>{scan_id} Asansör Raporu</div>", unsafe_allow_html=True)
     
     col_id = "Asansör_ID"
-    col_konum = "Konum"
-    col_durum = "Durum (Etiket)"
-    col_bakim = "Son_Bakım_Notları"
-    col_eksik = "Bekleyen_Eksikler"
-    col_adres = "Adres"
-    
     satir = df_asansor[df_asansor[col_id].astype(str) == str(scan_id)]
     if not satir.empty:
         d = satir.iloc[0]
-        val_durum = str(d[col_durum]).strip()
+        val_durum = str(d["Durum (Etiket)"]).strip()
         color = "#22c55e" if val_durum.lower() == "mavi" else "#ef4444"
         
         st.markdown(f"""
         <div style='background: #1e293b; border-left: 8px solid {color}; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); color: #f8fafc;'>
             <h3 style='margin-top:0; color:#F59E0B;'>🛠️ Sistem Kaydı: {scan_id}</h3>
-            <p style='margin: 8px 0;'><b>📍 Konum:</b> {d[col_konum]}</p>
+            <p style='margin: 8px 0;'><b>📍 Konum:</b> {d['Konum']}</p>
             <p style='margin: 8px 0;'><b>⚡ Mevcut Etiket Durumu:</b> <span style='background: {color}; color: white; padding: 3px 10px; border-radius: 6px; font-weight: bold;'>{val_durum} Etiket</span></p>
-            <p style='margin: 8px 0;'><b>📝 Son Bakım Notu:</b> {d[col_bakim]}</p>
-            <p style='margin: 8px 0;'><b>❌ Bekleyen Eksik:</b> {d[col_eksik]}</p>
-            <p style='margin: 8px 0;'><b>🏠 Bina Adresi:</b> {d[col_adres]}</p>
+            <p style='margin: 8px 0;'><b>📝 Son Bakım Notu:</b> {d['Son_Bakım_Notları']}</p>
+            <p style='margin: 8px 0;'><b>❌ Bekleyen Eksik:</b> {d['Bekleyen_Eksikler']}</p>
+            <p style='margin: 8px 0;'><b>🏠 Bina Adresi:</b> {d['Adres']}</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -523,7 +542,7 @@ if not st.session_state["authenticated"]:
     col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
     with col_l2:
         with st.form("login_form"):
-            # GİRİŞ EKRANI ŞEFFAF LOGOSU
+            # GİRİŞ EKRANI LOGO
             logo_b64_login = get_transparent_logo_base64()
             if logo_b64_login:
                 st.markdown(f"""
@@ -592,7 +611,7 @@ active_rate = st.session_state["live_rate"] if st.session_state["exchange_mode"]
 # --- SOL MENÜ (SIDEBAR) BÖLÜMÜ ---
 st.sidebar.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
 
-# SOL MENÜ ÜST KISIM ŞEFFAF LOGO
+# SOL MENÜ ŞEFFAF LOGO
 logo_b64_sb = get_transparent_logo_base64()
 if logo_b64_sb:
     st.sidebar.markdown(f"""
@@ -700,14 +719,15 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
         with col_cost3:
             iscilik_dakika_maliyet = st.number_input("İşçilik / Dakika (EUR):", min_value=0.00, value=0.25, step=0.05, format="%.4f")
             
+        # İstek üzerine: Kayma çubuğu (slider) yerine sayı girilebilen number_input alanları yapıldı
         st.markdown("##### 📈 Kar, İskonto & KDV")
         col_m1, col_m2, col_m3 = st.columns(3)
         with col_m1:
-            sabit_gider_payi = st.slider("Sabit Gider Payı (%):", min_value=0, max_value=50, value=15)
+            sabit_gider_payi = st.number_input("Sabit Gider Payı (%):", min_value=0, max_value=100, value=15, step=1)
         with col_m2:
-            kar_marji = st.slider("Hedef Kar Marjı (%):", min_value=0, max_value=500, value=25)
+            kar_marji = st.number_input("Hedef Kar Marjı (%):", min_value=0, max_value=1000, value=25, step=1)
         with col_m3:
-            iskonto_orani = st.slider("İskonto Oranı (%):", min_value=0, max_value=80, value=10)
+            iskonto_orani = st.number_input("İskonto Oranı (%):", min_value=0, max_value=100, value=10, step=1)
             
         kdv_orani = st.selectbox("KDV Oranı (%):", [0, 10, 20], index=2)
 
@@ -752,6 +772,7 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
         
         st.markdown("<br>", unsafe_allow_html=True)
         
+        # NameError Hatasını Düzeltmek İçin Kayıt ve PDF Oluşturma İşlemleri Düzgünce Kapsüllendi
         if st.button("💾 Teklifi Kaydet ve PDF Oluştur"):
             teklif_no = f"AS43-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
             yeni_teklif = {
@@ -766,53 +787,39 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                 "Tutar_EUR": round(genel_toplam_eur, 2),
                 "Tutar_TRY": round(genel_toplam_try, 2),
                 "Durum": "Bekliyor",
-                "Hazirlayan": st.session_state["username"],
+                "Hazirlayan": st.session_state.get("username", "Bilinmiyor"),
                 "Iletim_Durumu": "Gönderilmedi",
                 "Odeme_Durumu": "Ödeme Bekleniyor"
             }
             
-            yeni_teklif = {
-            "Teklif No": teklif_no,
-            "Tarih": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
-            "Hazırlayan": st.session_state.get("username", "Bilinmiyor"),
-            "Müşteri": musteri_adi,
-            "Şablon": sablon,
-            "Sac Cinsi": secilen_sac,
-            "Sac Kalınlığı": sac_kalinligi,
-            "Net Ağırlık (kg)": net_agirlik,
-            "Toplam Maliyet (€)": toplam_maliyet_eur,
-            "Liste Fiyatı (€)": liste_fiyati_eur,
-            "Genel Toplam (€)": genel_toplam_eur
-        }
+            df_yeni = pd.DataFrame([yeni_teklif])
+            df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
+            df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
+            
+            pdf_bytes = generate_pdf(
+                teklif_no, st.session_state["username"], musteri_adi, sablon, secilen_sac, sac_kalinligi,
+                net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur,
+                bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi,
+                sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, (liste_fiyati_eur * active_rate),
+                active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur
+            )
+            
+            st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
+            
+            def clean_name(t):
+                if not t: return ""
+                t = str(t)
+                replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
+                for k, v in replacements.items(): t = t.replace(k, v)
+                return t
 
-        df_yeni = pd.DataFrame([yeni_teklif])
-        df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
-        df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
-        
-        pdf_bytes = generate_pdf(
-            teklif_no, st.session_state["username"], musteri_adi, sablon, secilen_sac, sac_kalinligi,
-            net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur,
-            bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi,
-            sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, (liste_fiyati_eur * active_rate),
-            active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur
-        )
-        
-        st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
-        
-        def clean_name(t):
-            if not t: return ""
-            t = str(t)
-            replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
-            for k, v in replacements.items(): t = t.replace(k, v)
-            return t
-
-        st.download_button(
-            label="📥 Resmi PDF Teklif Belgesini İndir",
-            data=pdf_bytes,
-            file_name=f"{teklif_no}_{clean_name(musteri_adi)}.pdf",
-            mime="application/pdf",
-            key=f"download_pdf_{teklif_no}"
-        )
+            st.download_button(
+                label="📥 Resmi PDF Teklif Belgesini İndir",
+                data=pdf_bytes,
+                file_name=f"{teklif_no}_{clean_name(musteri_adi)}.pdf",
+                mime="application/pdf",
+                key=f"download_pdf_{teklif_no}"
+            )
 
 # ========================================================
 # 2. MODÜL: GEÇMİŞ TEKLİFLER & TAKİP
@@ -880,7 +887,7 @@ elif secilen_modul == "⚙️ Sistem Ayarları & Sac Fiyatları":
 # 4. MODÜL: STOK YÖNETİMİ
 # ========================================================
 elif secilen_modul == "📦 Stok Yönetimi":
-    st.markdown("<div class='main-title'>Metal ve Sac Stok Yönetimi</div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-title'>Depo Envanteri ve Malzeme Takip Konsolu</div>", unsafe_allow_html=True)
     st.markdown("<div class='main-subtitle'>Depo Envanteri ve Malzeme Takip Konsolu</div>", unsafe_allow_html=True)
     
     edited_stok_df = st.data_editor(df_stok, use_container_width=True, num_rows="dynamic")
