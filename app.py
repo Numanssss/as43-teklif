@@ -27,7 +27,11 @@ if not st.session_state['logged_in']:
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-       # Yetkili Kullanıcılar Listesi
+        # Kullanıcı Adı ve Şifre Alanları (Eksik olan kısımlar eklendi)
+        kullanici = st.text_input("Kullanıcı Adı").strip().lower()
+        sifre = st.text_input("Şifre", type="password")
+
+        # Yetkili Kullanıcılar Listesi
         yetkili_kullanicilar = {
             "mehmet": "as43mehmet",
             "metin": "as43metin",
@@ -51,7 +55,6 @@ if not st.session_state['logged_in']:
     st.stop()
 
 # --- ANA UYGULAMA ---
-# Şık Kurumsal Menü Başlığı (Dosya yolu derdi olmadan)
 st.sidebar.markdown("""
     <div style='text-align: center; padding: 10px 0;'>
         <h2 style='color: #d97706; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 1px;'>AS43 ASANSÖR</h2>
@@ -63,7 +66,6 @@ st.sidebar.markdown("""
 st.sidebar.write(f"Hoş geldiniz, **{st.session_state['user_name']}**")
 secim = st.sidebar.radio("Sayfalar", ["Yeni Teklif Oluştur", "Teklif Geçmişi & Takip", "Sac & Malzeme Fiyatları"])
 
-
 # Anlık Euro Kuru Çekme
 def get_euro_rate():
     try:
@@ -71,7 +73,6 @@ def get_euro_rate():
         return res.json()['rates'].get('TRY', 37.50)
     except:
         return 37.50
-
 
 euro_kur = get_euro_rate()
 
@@ -121,7 +122,7 @@ if secim == "Yeni Teklif Oluştur":
         m_col2.metric("Liste Fiyatı", f"€{liste_fiyati:.2f}")
         m_col3.metric("Özel Teklif Fiyatı", f"€{ozel_teklif_fiyati:.2f}", delta="-%10 İskonto")
 
-        st.info(f"Teklif No: TKF-2026-099 | Veren: Ahmet | Tarih: 01.08.2026 Cmt olarak sisteme kaydedildi.")
+        st.info(f"Teklif No: TKF-2026-099 | Veren: {st.session_state['user_name']} | Tarih: 01.08.2026 Cmt olarak sisteme kaydedildi.")
 
         whatsapp_mesaj = f"Sayın {musteri_adi}, AS43 Asansör teklifiniz: €{ozel_teklif_fiyati:.2f} (EUR) olarak hazırlanmıştır. Detaylar için iletişime geçebilirsiniz."
         st.markdown(f"[📲 Teklifi WhatsApp ile Gönder](https://wa.me/?text={whatsapp_mesaj})", unsafe_allow_html=True)
@@ -132,9 +133,9 @@ elif secim == "Teklif Geçmişi & Takip":
     df_gecmis = pd.DataFrame([
         {"Teklif No": "TKF-2026-001", "Müşteri": "Asansör Vizyon Ltd.", "Tarih": "01.08.2026 Cmt", "Yetkili": "Ahmet",
          "Tutar (EUR)": 1648.94, "Durum": "Onaylandı", "Açıklama": "-"},
-        {"Teklif No": "TKF-2026-002", "Müşteri": "Mega Asansör A.Ş.", "Tarih": "01.08.2026 Cmt", "Yetkili": "Ahmet",
+        {"Teklif No": "TKF-2026-002", "Müşteri": "Mega Asansör A.Ş.", "Tarih": "01.08.2026 Cmt", "Yetkili": "Mehmet",
          "Tutar (EUR)": 3450.00, "Durum": "Beklemede", "Açıklama": "Müşteri onay bekleniyor"},
-        {"Teklif No": "TKF-2026-003", "Müşteri": "Zirve Asansör", "Tarih": "01.08.2026 Cmt", "Yetkili": "Ahmet",
+        {"Teklif No": "TKF-2026-003", "Müşteri": "Zirve Asansör", "Tarih": "01.08.2026 Cmt", "Yetkili": "Sena",
          "Tutar (EUR)": 2100.00, "Durum": "Reddedildi", "Açıklama": "Fiyat yüksek bulundu"}
     ])
     st.dataframe(df_gecmis, use_container_width=True)
