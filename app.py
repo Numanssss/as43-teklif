@@ -771,31 +771,35 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                 "Odeme_Durumu": "Ödeme Bekleniyor"
             }
             
-            df_yeni = pd.DataFrame([yeni_teklif])
-            df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
-            df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
-            
-            pdf_bytes = generate_pdf(
-                teklif_no, st.session_state["username"], musteri_adi, sablon, secilen_sac, sac_kalinligi, 
-                net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur, 
-                bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi, 
-                sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, (liste_fiyati_eur * active_rate), 
-                active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur
-            )
-            
-            st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
-            def clean_name(t):
-                if not t: return ""
-                t = str(t)
-                replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
-                for k, v in replacements.items(): t = t.replace(k, v)
-                return t
-            st.download_button(
-                label="📥 Resmi PDF Teklif Belgesini İndir",
-                data=pdf_bytes,
-                file_name=f"{teklif_no}_{clean_name(musteri_adi)}.pdf",
-                mime="application/pdf"
-            )
+           df_yeni = pd.DataFrame([yeni_teklif])
+        df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
+        df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
+        
+        pdf_bytes = generate_pdf(
+            teklif_no, st.session_state["username"], musteri_adi, sablon, secilen_sac, sac_kalinligi,
+            net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur,
+            bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi,
+            sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, (liste_fiyati_eur * active_rate),
+            active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur
+        )
+        
+        st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
+        
+        # clean_name fonksiyonunu butonun üstünde çağırabilmek için önce tanımlıyoruz (veya bu fonksiyonu globalde tanımlı olmalı)
+        def clean_name(t):
+            if not t: return ""
+            t = str(t)
+            replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
+            for k, v in replacements.items(): t = t.replace(k, v)
+            return t
+
+        st.download_button(
+            label="📥 Resmi PDF Teklif Belgesini İndir",
+            data=pdf_bytes,
+            file_name=f"{teklif_no}_{clean_name(musteri_adi)}.pdf",
+            mime="application/pdf",
+            key=f"download_pdf_{teklif_no}"
+        )
 
 # ========================================================
 # 2. MODÜL: GEÇMİŞ TEKLİFLER & TAKİP
