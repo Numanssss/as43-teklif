@@ -188,7 +188,7 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
                 self.set_font('Helvetica', '', 9)
                 self.set_text_color(100, 116, 139)
                 self.cell(0, 5, 'Teklif & Operasyon Hizmetleri Detay Formu', ln=True, align='L')
-            else:
+        else:
                 self.set_font('Helvetica', 'B', 15)
                 self.set_text_color(217, 119, 6)
                 self.cell(0, 10, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='C')
