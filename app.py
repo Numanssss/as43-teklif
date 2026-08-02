@@ -113,7 +113,7 @@ st.markdown("""
         box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }
     
-    /* Koyu Temaya Tam Uyumlu Şeffaf Logo Taşıyıcı */
+    /* Koyu Temaya Tam Uyumlu Şeffaf Logo Taşıyıcı (Multiply ile Beyazları Arka Plana Yedirme) */
     .logo-container {
         display: flex;
         justify-content: center;
@@ -125,8 +125,8 @@ st.markdown("""
     .logo-img {
         max-width: 200px;
         background: transparent !important;
-        mix-blend-mode: screen; /* Beyaz ve transparan alanları koyu arka planda kusursuz gizler */
-        filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.3));
+        mix-blend-mode: multiply; /* Görseldeki beyaz ve damalı alanları koyu site arka planına kusursuz harmanlar */
+        filter: brightness(1.05) contrast(1.1);
     }
     
     /* Özelleştirilmiş Buton Stili (Turuncu Gradyan) */
