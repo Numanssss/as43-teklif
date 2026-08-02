@@ -66,9 +66,10 @@ st.markdown("""
         overflow-y: auto !important; /* Tüm kaydırma bu ana kanaldan yapılır */
         overflow-x: hidden !important;
         overscroll-behavior-y: contain !important; /* Pull-to-refresh yenilemeyi engeller */
+        scroll-behavior: smooth !important; /* Pürüzsüz ve akıcı kaydırma */
     }
     
-    /* İç Konteynerlerin Kilitlerini Kırma (Nested Scroll İptali) */
+    /* İç Konteynerlerin Kilitlerini Kırma (Nested Scroll İptali) & GPU Hızlandırma */
     #root, 
     [data-testid="stAppViewContainer"], 
     [data-testid="stApp"], 
@@ -78,6 +79,10 @@ st.markdown("""
         min-height: 100% !important;
         overflow: visible !important; /* İç kaydırma çubuklarını iptal edip body'ye aktarır */
         overscroll-behavior-y: contain !important;
+        /* GPU Donanım Hızlandırması (Arayüz Takılmalarını Engeller) */
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        will-change: transform;
     }
     
     /* Üst Kurumsal Çizgi (Premium Turuncu) */
