@@ -55,24 +55,23 @@ def get_transparent_logo_base64():
 # --- KURUMSAL BRANDING & PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* Global sayfa arka planı */
+    /* Global sayfa arka planı ve Pull-to-Refresh Engelleme */
     html, body {
         background-color: #0f172a;
         color: #f8fafc;
-        overflow: hidden !important;
-        height: 100% !important;
-        width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+        overscroll-behavior-y: contain !important; /* Sayfa yenilemeyi tamamen engeller */
+        overscroll-behavior-x: none !important;
     }
     
-    /* Android/Mobil Kaydırma Düzeltmesi */
+    /* Mobil Kaydırma ve Stabilizasyon */
     [data-testid="stAppViewContainer"], [data-testid="stApp"] {
         background-color: #0f172a;
         color: #f8fafc;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
-        height: 100% !important;
+        overscroll-behavior-y: contain !important; /* Alt container yenilemesini engeller */
     }
     
     /* Üst Kurumsal Çizgi (Premium Turuncu) */
@@ -652,7 +651,7 @@ secilen_modul = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 
-st.sidebar.markdown("#### 💶 EUR/TRY Döviz Kuru")
+st.sidebar.markdown("#### ⚙️ EUR/TRY Döviz Kuru")
 st.sidebar.markdown(
     f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; text-align: center;'><span style='font-size: 0.8rem; color:#94a3b8; font-weight:600;'>AKTİF EUR/TRY KURU</span><br>"
     f"<span style='font-size: 1.4rem; font-weight: 800; color: #22c55e;'>{active_rate:.4f} TL</span><br>"
