@@ -1658,7 +1658,7 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
         kasnak_olculeri = st.text_input("Kasnak Ölçüleri:", value="YOK")
         seperator = st.text_input("Seperatör (K. Ağırlık):", value="YOK")
         
-     with col_e2:
+    with col_e2:
         st.subheader("🚪 Kapı, Kumanda ve Diğer Bilgiler")
         kapi_gen_yuk = st.text_input("Kapı Genişlik x Yükseklik:", value="150 X 210")
         kabin_kapi_adedi = st.text_input("Kabin Kapı Adedi (örn: TEK GİRİŞ):", value="TEK GİRİŞ")
