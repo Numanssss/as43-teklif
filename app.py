@@ -179,7 +179,7 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
            if os.path.exists("logo.png"):
                 self.set_fill_color(30, 41, 59)
                 self.rect(10, 8, 32, 14, 'F')
-                self.image("asansor_logo.png", 11, 9, 30)
+                self.image("logo.png", 11, 9, 30)
                 self.set_x(45)
                 self.set_font('Helvetica', 'B', 14)
                 self.set_text_color(217, 119, 6) # Amber kurumsal renk
