@@ -928,7 +928,7 @@ def init_databases():
                 "Elektrostatik Boyalı Sac"
             ],
             "Miktar_kg": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-         })
+        })
         df_stok_template.to_csv(FILE_STOK, index=False, encoding='utf-8-sig')
 
     if not os.path.exists(FILE_GIDERLER):
@@ -1153,11 +1153,7 @@ if "live_rate" not in st.session_state:
 if "custom_rate" not in st.session_state:
     st.session_state["custom_rate"] = st.session_state["live_rate"]
 
-active_rate = st.session_state["live_rate"] if st.session_state["exchange_mode"] == "Canely" else st.session_state["custom_rate"]
-if st.session_state["exchange_mode"] == "Canlı":
-    active_rate = st.session_state["live_rate"]
-else:
-    active_rate = st.session_state["custom_rate"]
+active_rate = st.session_state["live_rate"] if st.session_state["exchange_mode"] == "Canlı" else st.session_state["custom_rate"]
 
 # --- SOL MENÜ (SIDEBAR) BÖLÜMÜ ---
 st.sidebar.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
@@ -1283,94 +1279,94 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
             
         kdv_orani = st.selectbox("KDV Oranı (%):", [0, 10, 20], index=2)
 
-     with col_w2:
-         st.subheader("📊 Maliyet ve Teklif Analizi")
-         
-         brut_agirlik = net_agirlik * (1 + (fire_orani / 100))
-         hammadde_maliyeti_eur = brut_agirlik * birim_fiyat_eur_kg
-         
-         lazer_maliyeti_eur = lazer_suresi * lazer_dakika_maliyet
-         bukum_maliyeti_eur = bukum_suresi * bukum_dakika_maliyet
-         iscilik_maliyeti_eur = iscilik_suresi * iscilik_dakika_maliyet
-         
-         uretim_ara_toplam_eur = hammadde_maliyeti_eur + lazer_maliyeti_eur + bukum_maliyeti_eur + iscilik_maliyeti_eur
-         sabit_gider_maliyeti_eur = uretim_ara_toplam_eur * (sabit_gider_payi / 100)
-         
-         toplam_maliyet_eur = uretim_ara_toplam_eur + sabit_gider_maliyeti_eur
-         
-         liste_fiyati_eur = toplam_maliyet_eur * (1 + (kar_marji / 100))
-         
-         iskonto_tutari_eur = liste_fiyati_eur * (iskonto_orani / 100)
-         iskontolu_fiyat_eur = liste_fiyati_eur - iskonto_tutari_eur
-         
-         kdv_tutari_eur = iskontolu_fiyat_eur * (kdv_orani / 100)
-         genel_toplam_eur = iskontolu_fiyat_eur + kdv_tutari_eur
-         
-         genel_toplam_try = genel_toplam_eur * active_rate
-         
-         st.markdown(f"""
-         <div class='quote-result-card'>
-             <h3 style='margin-top:0; color:#F59E0B;'>💰 Fiyatlandırma Özeti</h3>
-             <hr style='border-color: #334155;'>
-             <p><b>Hammadde Maliyeti:</b> {hammadde_maliyeti_eur:.2f} EUR ({brut_agirlik:.1f} kg)</p>
-             <p><b>Operasyonlar (Lazer+Büküm+İşçilik):</b> {(lazer_maliyeti_eur + bukum_maliyeti_eur + iscilik_maliyeti_eur):.2f} EUR</p>
-             <p><b>Toplam Net Maliyet:</b> {toplam_maliyet_eur:.2f} EUR</p>
-             <p><b>Liste Satış Fiyatı (Kâr Dahil):</b> {liste_fiyati_eur:.2f} EUR</p>
-             <p><b>İskonto Tutarı (%{iskonto_orani}):</b> -{iskonto_tutari_eur:.2f} EUR</p>
-             <h2 style='color:#22c55e; margin-bottom:5px;'>GENEL TOPLAM: {genel_toplam_eur:.2f} EUR</h2>
-             <p style='color:#94a3b8; font-size:0.9rem;'>TL Karşılığı (Kur: {active_rate:.2f}): <b>{genel_toplam_try:,.2f} TL</b></p>
-         </div>
-         """, unsafe_allow_html=True)
-         
-         st.markdown("<br>", unsafe_allow_html=True)
-         
-         if st.button("💾 Teklifi Kaydet ve PDF Oluştur"):
-             teklif_no = f"AS43-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
-             yeni_teklif = {
-                 "Teklif_ID": teklif_no,
-                 "Tarih": datetime.date.today().strftime('%Y-%m-%d'),
-                 "Musteri": musteri_adi,
-                 "Sablon": sablon,
-                 "Malzeme_Tipi": secilen_sac,
-                 "Kalinlik_mm": sac_kalinligi,
-                 "Net_Agirlik_kg": net_agirlik,
-                 "Fire_Orani": fire_orani,
-                 "Tutar_EUR": round(genel_toplam_eur, 2),
-                 "Tutar_TRY": round(genel_toplam_try, 2),
-                 "Durum": "Bekliyor",
-                 "Hazirlayan": st.session_state.get("username", "Bilinmiyor"),
-                 "Iletim_Durumu": "Gönderilmedi",
-                 "Odeme_Durumu": "Ödeme Bekleniyor"
-             }
+    with col_w2:
+        st.subheader("📊 Maliyet ve Teklif Analizi")
+        
+        brut_agirlik = net_agirlik * (1 + (fire_orani / 100))
+        hammadde_maliyeti_eur = brut_agirlik * birim_fiyat_eur_kg
+        
+        lazer_maliyeti_eur = lazer_suresi * lazer_dakika_maliyet
+        bukum_maliyeti_eur = bukum_suresi * bukum_dakika_maliyet
+        iscilik_maliyeti_eur = iscilik_suresi * iscilik_dakika_maliyet
+        
+        uretim_ara_toplam_eur = hammadde_maliyeti_eur + lazer_maliyeti_eur + bukum_maliyeti_eur + iscilik_maliyeti_eur
+        sabit_gider_maliyeti_eur = uretim_ara_toplam_eur * (sabit_gider_payi / 100)
+        
+        toplam_maliyet_eur = uretim_ara_toplam_eur + sabit_gider_maliyeti_eur
+        
+        liste_fiyati_eur = toplam_maliyet_eur * (1 + (kar_marji / 100))
+        
+        iskonto_tutari_eur = liste_fiyati_eur * (iskonto_orani / 100)
+        iskontolu_fiyat_eur = liste_fiyati_eur - iskonto_tutari_eur
+        
+        kdv_tutari_eur = iskontolu_fiyat_eur * (kdv_orani / 100)
+        genel_toplam_eur = iskontolu_fiyat_eur + kdv_tutari_eur
+        
+        genel_toplam_try = genel_toplam_eur * active_rate
+        
+        st.markdown(f"""
+        <div class='quote-result-card'>
+            <h3 style='margin-top:0; color:#F59E0B;'>💰 Fiyatlandırma Özeti</h3>
+            <hr style='border-color: #334155;'>
+            <p><b>Hammadde Maliyeti:</b> {hammadde_maliyeti_eur:.2f} EUR ({brut_agirlik:.1f} kg)</p>
+            <p><b>Operasyonlar (Lazer+Büküm+İşçilik):</b> {(lazer_maliyeti_eur + bukum_maliyeti_eur + iscilik_maliyeti_eur):.2f} EUR</p>
+            <p><b>Toplam Net Maliyet:</b> {toplam_maliyet_eur:.2f} EUR</p>
+            <p><b>Liste Satış Fiyatı (Kâr Dahil):</b> {liste_fiyati_eur:.2f} EUR</p>
+            <p><b>İskonto Tutarı (%{iskonto_orani}):</b> -{iskonto_tutari_eur:.2f} EUR</p>
+            <h2 style='color:#22c55e; margin-bottom:5px;'>GENEL TOPLAM: {genel_toplam_eur:.2f} EUR</h2>
+            <p style='color:#94a3b8; font-size:0.9rem;'>TL Karşılığı (Kur: {active_rate:.2f}): <b>{genel_toplam_try:,.2f} TL</b></p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("💾 Teklifi Kaydet ve PDF Oluştur"):
+            teklif_no = f"AS43-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+            yeni_teklif = {
+                "Teklif_ID": teklif_no,
+                "Tarih": datetime.date.today().strftime('%Y-%m-%d'),
+                "Musteri": musteri_adi,
+                "Sablon": sablon,
+                "Malzeme_Tipi": secilen_sac,
+                "Kalinlik_mm": sac_kalinligi,
+                "Net_Agirlik_kg": net_agirlik,
+                "Fire_Orani": fire_orani,
+                "Tutar_EUR": round(genel_toplam_eur, 2),
+                "Tutar_TRY": round(genel_toplam_try, 2),
+                "Durum": "Bekliyor",
+                "Hazirlayan": st.session_state.get("username", "Bilinmiyor"),
+                "Iletim_Durumu": "Gönderilmedi",
+                "Odeme_Durumu": "Ödeme Bekleniyor"
+            }
+            
+            df_yeni = pd.DataFrame([yeni_teklif])
+            df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
+            df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
+            
+            pdf_bytes = generate_pdf(
+                teklif_no, st.session_state["username"], musteri_adi, sablon, secilen_sac, sac_kalinligi,
+                net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur,
+                bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi,
+                sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, (liste_fiyati_eur * active_rate),
+                active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur
+            )
+            
+            st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
              
-             df_yeni = pd.DataFrame([yeni_teklif])
-             df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
-             df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
-             
-             pdf_bytes = generate_pdf(
-                 teklif_no, st.session_state["username"], musteri_adi, sablon, secilen_sac, sac_kalinligi,
-                 net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur,
-                 bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi,
-                 sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, (liste_fiyati_eur * active_rate),
-                 active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur
-             )
-             
-             st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
-             
-             def clean_name(t):
-                 if not t: return ""
-                 t = str(t)
-                 replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
-                 for k, v in replacements.items(): t = t.replace(k, v)
-                 return t
+            def clean_name(t):
+                if not t: return ""
+                t = str(t)
+                replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
+                for k, v in replacements.items(): t = t.replace(k, v)
+                return t
  
-             st.download_button(
-                 label="📥 Resmi PDF Teklif Belgesini İndir",
-                 data=pdf_bytes,
-                 file_name=f"{teklif_no}_{clean_name(musteri_adi)}.pdf",
-                 mime="application/pdf",
-                 key=f"download_pdf_{teklif_no}"
-             )
+            st.download_button(
+                label="📥 Resmi PDF Teklif Belgesini İndir",
+                data=pdf_bytes,
+                file_name=f"{teklif_no}_{clean_name(musteri_adi)}.pdf",
+                mime="application/pdf",
+                key=f"download_pdf_{teklif_no}"
+            )
 
 # ========================================================
 # 1B. MODÜL: ASANSÖR İMALAT TEKLİF FORMU
@@ -1419,169 +1415,169 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
         kasnak_olculeri = st.text_input("Kasnak Ölçüleri:", value="YOK")
         seperator = st.text_input("Seperatör (K. Ağırlık):", value="YOK")
         
-     with col_e2:
-         st.subheader("🚪 Kapı, Kumanda ve Diğer Bilgiler")
-         kapi_gen_yuk = st.text_input("Kapı Genişlik x Yükseklik:", value="150 X 210")
-         kabin_kapi_adedi = st.text_input("Kabin Kapı Adedi (örn: TEK GİRİŞ):", value="TEK GİRİŞ")
-         kapi_model = st.text_input("Kapı Modeli (Kabin):", value="ÇARPMA")
-         kat_kapi_adedi = st.text_input("Kat Kapı Adedi:", value="YOK")
-         kat_kapi_model = st.text_input("Kat Kapı Modeli:", value="YOK")
-         kapi_yon = st.text_input("Kapı Yönü:", value="ÇARPMA")
-         kapi_kaplama = st.text_input("Kapı Kaplama:", value="YOK")
-         kasa_kaplama = st.text_input("Kasa Kaplama:", value="YOK")
-         panel_kaplama = st.text_input("Panel Kaplama:", value="YOK")
-         kapi_not = st.text_input("Kapı Notu:", value="YOK")
+    with col_e2:
+        st.subheader("🚪 Kapı, Kumanda ve Diğer Bilgiler")
+        kapi_gen_yuk = st.text_input("Kapı Genişlik x Yükseklik:", value="150 X 210")
+        kabin_kapi_adedi = st.text_input("Kabin Kapı Adedi (örn: TEK GİRİŞ):", value="TEK GİRİŞ")
+        kapi_model = st.text_input("Kapı Modeli (Kabin):", value="ÇARPMA")
+        kat_kapi_adedi = st.text_input("Kat Kapı Adedi:", value="YOK")
+        kat_kapi_model = st.text_input("Kat Kapı Modeli:", value="YOK")
+        kapi_yon = st.text_input("Kapı Yönü:", value="ÇARPMA")
+        kapi_kaplama = st.text_input("Kapı Kaplama:", value="YOK")
+        kasa_kaplama = st.text_input("Kasa Kaplama:", value="YOK")
+        panel_kaplama = st.text_input("Panel Kaplama:", value="YOK")
+        kapi_not = st.text_input("Kapı Notu:", value="YOK")
          
-         st.markdown("---")
-         pano_adet = st.text_input("Pano Adet:", value="1")
-         pano_guc = st.text_input("Pano Güç:", value="Standart")
-         pano_tipi = st.text_input("Pano Tipi:", value="YOK")
-         pano_surucu = st.text_input("Pano Sürücü:", value="YOK")
-         pano_kart = st.text_input("Kumanda Kartı:", value="YOK")
-         pano_salt = st.text_input("Şalt Malzeme:", value="YOK")
-         pano_konum = st.text_input("Konum Yeri:", value="YOK")
-         pano_not = st.text_input("Pano Notu:", value="YOK")
+        st.markdown("---")
+        pano_adet = st.text_input("Pano Adet:", value="1")
+        pano_guc = st.text_input("Pano Güç:", value="Standart")
+        pano_tipi = st.text_input("Pano Tipi:", value="YOK")
+        pano_surucu = st.text_input("Pano Sürücü:", value="YOK")
+        pano_kart = st.text_input("Kumanda Kartı:", value="YOK")
+        pano_salt = st.text_input("Şalt Malzeme:", value="YOK")
+        pano_konum = st.text_input("Konum Yeri:", value="YOK")
+        pano_not = st.text_input("Pano Notu:", value="YOK")
          
-         st.markdown("---")
-         st.subheader("📝 İmzalar ve Teslimat")
-         musteri_temsilcisi = st.text_input("Müşteri Temsilcisi Adı Soyadı:", value=st.session_state.get("username", "Ahmet Bey"))
-         imalat_muduru = st.text_input("İmalat Müdürü Adı Soyadı:", value="Mehmet Usta")
+        st.markdown("---")
+        st.subheader("📝 İmzalar ve Teslimat")
+        musteri_temsilcisi = st.text_input("Müşteri Temsilcisi Adı Soyadı:", value=st.session_state.get("username", "Ahmet Bey"))
+        imalat_muduru = st.text_input("İmalat Müdürü Adı Soyadı:", value="Mehmet Usta")
          
-         col_t1, col_t2 = st.columns(2)
-         with col_t1:
-             tarih_kabin = st.text_input("Kabin Teslim Tarihi:", value="-")
-             tarih_sase = st.text_input("Şase Teslim Tarihi:", value="-")
-             tarih_kapilar = st.text_input("Kapılar Teslim Tarihi:", value="-")
-             tarih_pano = st.text_input("Pano Teslim Tarihi:", value="-")
-         with col_t2:
-             desc_kabin = st.text_input("Kabin Açıklama:", value="-")
-             desc_sase = st.text_input("Şase Açıklama:", value="-")
-             desc_kapilar = st.text_input("Kapılar Açıklama:", value="-")
-             desc_pano = st.text_input("Pano Açıklama:", value="-")
+        col_t1, col_t2 = st.columns(2)
+        with col_t1:
+            tarih_kabin = st.text_input("Kabin Teslim Tarihi:", value="-")
+            tarih_sase = st.text_input("Şase Teslim Tarihi:", value="-")
+            tarih_kapilar = st.text_input("Kapılar Teslim Tarihi:", value="-")
+            tarih_pano = st.text_input("Pano Teslim Tarihi:", value="-")
+        with col_t2:
+            desc_kabin = st.text_input("Kabin Açıklama:", value="-")
+            desc_sase = st.text_input("Şase Açıklama:", value="-")
+            desc_kapilar = st.text_input("Kapılar Açıklama:", value="-")
+            desc_pano = st.text_input("Pano Açıklama:", value="-")
              
-         genel_not = st.text_area("Özel Form Notu (Ortada Görünen):", value="HİDROLİK ASANSÖR SADECE KABİN KOVASI YAPILACAKTIR. 150 CM GENİŞLİK 85 CM DERİNLİK OLACAKTIR.")
+        genel_not = st.text_area("Özel Form Notu (Ortada Görünen):", value="HİDROLİK ASANSÖR SADECE KABİN KOVASI YAPILACAKTIR. 150 CM GENİŞLİK 85 CM DERİNLİK OLACAKTIR.")
  
-     st.markdown("---")
-     st.subheader("🖼️ Görsel Girişleri ve Alt Ölçü Bilgileri")
+    st.markdown("---")
+    st.subheader("🖼️ Görsel Girişleri ve Alt Ölçü Bilgileri")
      
-     col_img1, col_img2, col_img3, col_img4 = st.columns(4)
-     with col_img1:
-         st.markdown("**1. TABAN MODELİ**")
-         file_taban = st.file_uploader("Taban Görseli:", type=["png", "jpg", "jpeg"], key="up_taban")
-         dim_taban = st.text_input("Taban Ölçü Bilgisi:", value="Antibakteriyel Sunta", key="in_dim_taban")
-     with col_img2:
-         st.markdown("**2. KABİN MODELİ**")
-         file_kabin = st.file_uploader("Kabin Görseli:", type=["png", "jpg", "jpeg"], key="up_kabin")
-         dim_kabin = st.text_input("Kabin Ölçü Bilgisi (Genişlik x Derinlik):", value="150 X 85 cm", key="in_dim_kabin")
-     with col_img3:
-         st.markdown("**3. TAVAN MODELİ**")
-         file_tavan = st.file_uploader("Tavan Görseli:", type=["png", "jpg", "jpeg"], key="up_tavan")
-         dim_tavan = st.text_input("Tavan Ölçü Bilgisi:", value="T-189 Model", key="in_dim_tavan")
-     with col_img4:
-         st.markdown("**4. KUYU KESİTİ / ÖZEL ÇİZİM**")
-         file_kuyu = st.file_uploader("Kuyu/Özel Görseli:", type=["png", "jpg", "jpeg"], key="up_kuyu")
-         dim_kuyu = st.text_input("Kuyu Ölçü Bilgisi (Kuyu Genişlik x Derinlik):", value="170 X 124 cm", key="in_dim_kuyu")
+    col_img1, col_img2, col_img3, col_img4 = st.columns(4)
+    with col_img1:
+        st.markdown("**1. TABAN MODELİ**")
+        file_taban = st.file_uploader("Taban Görseli:", type=["png", "jpg", "jpeg"], key="up_taban")
+        dim_taban = st.text_input("Taban Ölçü Bilgisi:", value="Antibakteriyel Sunta", key="in_dim_taban")
+    with col_img2:
+        st.markdown("**2. KABİN MODELİ**")
+        file_kabin = st.file_uploader("Kabin Görseli:", type=["png", "jpg", "jpeg"], key="up_kabin")
+        dim_kabin = st.text_input("Kabin Ölçü Bilgisi (Genişlik x Derinlik):", value="150 X 85 cm", key="in_dim_kabin")
+    with col_img3:
+        st.markdown("**3. TAVAN MODELİ**")
+        file_tavan = st.file_uploader("Tavan Görseli:", type=["png", "jpg", "jpeg"], key="up_tavan")
+        dim_tavan = st.text_input("Tavan Ölçü Bilgisi:", value="T-189 Model", key="in_dim_tavan")
+    with col_img4:
+        st.markdown("**4. KUYU KESİTİ / ÖZEL ÇİZİM**")
+        file_kuyu = st.file_uploader("Kuyu/Özel Görseli:", type=["png", "jpg", "jpeg"], key="up_kuyu")
+        dim_kuyu = st.text_input("Kuyu Ölçü Bilgisi (Kuyu Genişlik x Derinlik):", value="170 X 124 cm", key="in_dim_kuyu")
  
-     st.markdown("<br>", unsafe_allow_html=True)
-     if st.button("💾 İmalat Teklif Belgesi (PDF) Oluştur", use_container_width=True):
-         images_paths = {}
-         for k, f in [("taban", file_taban), ("kabin", file_kabin), ("tavan", file_tavan), ("kuyu", file_kuyu)]:
-             if f:
-                 with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
-                     tmp.write(f.getvalue())
-                     images_paths[k] = tmp.name
-             else:
-                 images_paths[k] = None
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("💾 İmalat Teklif Belgesi (PDF) Oluştur", use_container_width=True):
+        images_paths = {}
+        for k, f in [("taban", file_taban), ("kabin", file_kabin), ("tavan", file_tavan), ("kuyu", file_kuyu)]:
+            if f:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+                    tmp.write(f.getvalue())
+                    images_paths[k] = tmp.name
+            else:
+                images_paths[k] = None
                  
-         # Parse Genişlik x Derinlik or details
-         kabin_gen_der = f"{dim_kabin}"
+        # Parse Genişlik x Derinlik or details
+        kabin_gen_der = f"{dim_kabin}"
          
-         pdf_data = {
-             "firma": firma,
-             "referans": referans,
-             "siparis_no": siparis_no,
-             "teklif_no": teklif_no_form,
-             "kapasite": kapasite,
-             "hiz": hiz,
-             "kabin_gen_der": kabin_gen_der,
-             "seyir_detay": "0 / 0 / 0 mm",
-             "durak": durak,
-             "giris_sayisi": giris_sayisi,
-             "aski_tipi": aski_tipi,
-             "kuyu_tipi": kuyu_tipi,
-             "ana_ray": ana_ray,
-             "ana_ray_arasi": ana_ray_arasi,
-             "kabin_modeli": kabin_modeli,
-             "kabin_kaplama": kabin_kaplama,
-             "doseme_tipi": doseme_tipi,
-             "aksesuar_kaplama": aksesuar_kaplama,
-             "kapi_giris_kaplama": kapi_giris_kaplama,
-             "tavan_modeli": tavan_modeli,
-             "taban_modeli": taban_modeli,
-             "ayna_detay": ayna_detay,
-             "sabitleme_kit": sabitleme_kit,
-             "asiri_yuk": asiri_yuk,
-             "not": genel_not,
-             "dim_kabin": dim_kabin,
-             "dim_kuyu": dim_kuyu,
-             "agirlik_sasesi": agirlik_sasesi,
-             "agirlik_ray_arasi": agirlik_ray_arasi,
-             "agirlik_adet": agirlik_adet,
-             "agirlik_ray_olcu": agirlik_ray_olcu,
-             "makine_sasesi": makine_sasesi,
-             "motor_marka": motor_marka,
-             "kasnak_olculeri": kasnak_olculeri,
-             "seperator": seperator,
-             "kapi_gen_yuk": kapi_gen_yuk,
-             "kabin_kapi_adedi": kabin_kapi_adedi,
-             "kapi_model": kapi_model,
-             "kat_kapi_adedi": kat_kapi_adedi,
-             "kat_kapi_model": kat_kapi_model,
-             "kapi_yon": kapi_yon,
-             "kapi_kaplama": kapi_kaplama,
-             "kasa_kaplama": kasa_kaplama,
-             "panel_kaplama": panel_kaplama,
-             "kapi_not": kapi_not,
-             "pano_adet": pano_adet,
-             "pano_guc": pano_guc,
-             "pano_tipi": pano_tipi,
-             "pano_surucu": pano_surucu,
-             "pano_kart": pano_kart,
-             "pano_salt": pano_salt,
-             "pano_konum": pano_konum,
-             "pano_not": pano_not,
-             "musteri_temsilcisi": musteri_temsilcisi,
-             "imalat_muduru": imalat_muduru,
-             "tarih_kabin": tarih_kabin,
-             "tarih_sase": tarih_sase,
-             "tarih_kapi": tarih_kapilar,
-             "tarih_pano": tarih_pano,
-             "desc_kabin": desc_kabin,
-             "desc_sase": desc_sase,
-             "desc_kapi": desc_kapilar,
-             "desc_pano": desc_pano
-         }
+        pdf_data = {
+            "firma": firma,
+            "referans": referans,
+            "siparis_no": siparis_no,
+            "teklif_no": teklif_no_form,
+            "kapasite": kapasite,
+            "hiz": hiz,
+            "kabin_gen_der": kabin_gen_der,
+            "seyir_detay": "0 / 0 / 0 mm",
+            "durak": durak,
+            "giris_sayisi": giris_sayisi,
+            "aski_tipi": aski_tipi,
+            "kuyu_tipi": kuyu_tipi,
+            "ana_ray": ana_ray,
+            "ana_ray_arasi": ana_ray_arasi,
+            "kabin_modeli": kabin_modeli,
+            "kabin_kaplama": kabin_kaplama,
+            "doseme_tipi": doseme_tipi,
+            "aksesuar_kaplama": aksesuar_kaplama,
+            "kapi_giris_kaplama": kapi_giris_kaplama,
+            "tavan_modeli": tavan_modeli,
+            "taban_modeli": taban_modeli,
+            "ayna_detay": ayna_detay,
+            "sabitleme_kit": sabitleme_kit,
+            "asiri_yuk": asiri_yuk,
+            "not": genel_not,
+            "dim_kabin": dim_kabin,
+            "dim_kuyu": dim_kuyu,
+            "agirlik_sasesi": agirlik_sasesi,
+            "agirlik_ray_arasi": agirlik_ray_arasi,
+            "agirlik_adet": agirlik_adet,
+            "agirlik_ray_olcu": agirlik_ray_olcu,
+            "makine_sasesi": makine_sasesi,
+            "motor_marka": motor_marka,
+            "kasnak_olculeri": kasnak_olculeri,
+            "seperator": seperator,
+            "kapi_gen_yuk": kapi_gen_yuk,
+            "kabin_kapi_adedi": kabin_kapi_adedi,
+            "kapi_model": kapi_model,
+            "kat_kapi_adedi": kat_kapi_adedi,
+            "kat_kapi_model": kat_kapi_model,
+            "kapi_yon": kapi_yon,
+            "kapi_kaplama": kapi_kaplama,
+            "kasa_kaplama": kasa_kaplama,
+            "panel_kaplama": panel_kaplama,
+            "kapi_not": kapi_not,
+            "pano_adet": pano_adet,
+            "pano_guc": pano_guc,
+            "pano_tipi": pano_tipi,
+            "pano_surucu": pano_surucu,
+            "pano_kart": pano_kart,
+            "pano_salt": pano_salt,
+            "pano_konum": pano_konum,
+            "pano_not": pano_not,
+            "musteri_temsilcisi": musteri_temsilcisi,
+            "imalat_muduru": imalat_muduru,
+            "tarih_kabin": tarih_kabin,
+            "tarih_sase": tarih_sase,
+            "tarih_kapi": tarih_kapilar,
+            "tarih_pano": tarih_pano,
+            "desc_kabin": desc_kabin,
+            "desc_sase": desc_sase,
+            "desc_kapi": desc_kapilar,
+            "desc_pano": desc_pano
+        }
          
-         try:
-             pdf_bytes_imalat = generate_asansor_imalat_pdf(pdf_data, images_paths)
-             st.success("İmalat teklif formu başarıyla hazırlandı!")
+        try:
+            pdf_bytes_imalat = generate_asansor_imalat_pdf(pdf_data, images_paths)
+            st.success("İmalat teklif formu başarıyla hazırlandı!")
              
-             def clean_name_sb(t):
-                 if not t: return ""
-                 t = str(t)
-                 replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
-                 for k, v in replacements.items(): t = t.replace(k, v)
-                 return t
+            def clean_name_sb(t):
+                if not t: return ""
+                t = str(t)
+                replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
+                for k, v in replacements.items(): t = t.replace(k, v)
+                return t
                  
-             st.download_button(
-                 label="📥 Resmi İmalat Teklif PDF Dosyasını İndir",
-                 data=pdf_bytes_imalat,
-                 file_name=f"Imalat_Teklif_{clean_name_sb(firma)}.pdf",
-                 mime="application/pdf",
-                 use_container_width=True
-             )
-         except Exception as e:
-             st.error(f"PDF oluşturulurken bir hata oluştu: {e}")
+            st.download_button(
+                label="📥 Resmi İmalat Teklif PDF Dosyasını İndir",
+                data=pdf_bytes_imalat,
+                file_name=f"Imalat_Teklif_{clean_name_sb(firma)}.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+        except Exception as e:
+            st.error(f"PDF oluşturulurken bir hata oluştu: {e}")
 
 # ========================================================
 # 2. MODÜL: GEÇMİŞ TEKLİFLER & TAKİP
