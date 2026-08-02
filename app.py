@@ -771,7 +771,7 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                 "Odeme_Durumu": "Ödeme Bekleniyor"
             }
             
-           df_yeni = pd.DataFrame([yeni_teklif])
+        df_yeni = pd.DataFrame([yeni_teklif])
         df_teklifler_updated = pd.concat([df_teklifler, df_yeni], ignore_index=True)
         df_teklifler_updated.to_csv(FILE_TEKLIFLER, index=False, encoding='utf-8-sig')
         
@@ -785,7 +785,6 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
         
         st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
         
-        # clean_name fonksiyonunu butonun üstünde çağırabilmek için önce tanımlıyoruz (veya bu fonksiyonu globalde tanımlı olmalı)
         def clean_name(t):
             if not t: return ""
             t = str(t)
