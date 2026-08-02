@@ -529,8 +529,20 @@ USER_PASSWORDS = {
 
 USER_DB = {username: hash_password(password) for username, password in USER_PASSWORDS.items()}
 
+# Eğer URL'de önceden kaydedilmiş aktif bir oturum parametresi varsa, session_state'e yükle (Yenileme koruması)
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
+
+if not st.session_state["authenticated"] and "user" in st.query_params:
+    saved_user = st.query_params["user"].lower()
+    if saved_user in USER_PASSWORDS:
+        st.session_state["authenticated"] = True
+        if saved_user in ["unal", "ünal"]:
+            st.session_state["username"] = "Ünal"
+        elif saved_user in ["ayca", "ayça"]:
+            st.session_state["username"] = "Ayça"
+        else:
+            st.session_state["username"] = saved_user.capitalize()
 
 if not st.session_state["authenticated"]:
     st.markdown("""
@@ -580,6 +592,7 @@ if not st.session_state["authenticated"]:
                 
                 if is_valid:
                     st.session_state["authenticated"] = True
+                    st.query_params["user"] = username_input
                     if username_input in ["unal", "ünal"]:
                         display_name = "Ünal"
                     elif username_input in ["ayca", "ayça"]:
@@ -651,7 +664,7 @@ secilen_modul = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 
-st.sidebar.markdown("#### ⚙️ EUR/TRY Döviz Kuru")
+st.sidebar.markdown("#### 💶 EUR/TRY Döviz Kuru")
 st.sidebar.markdown(
     f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; text-align: center;'><span style='font-size: 0.8rem; color:#94a3b8; font-weight:600;'>AKTİF EUR/TRY KURU</span><br>"
     f"<span style='font-size: 1.4rem; font-weight: 800; color: #22c55e;'>{active_rate:.4f} TL</span><br>"
@@ -664,6 +677,7 @@ st.sidebar.markdown("<br>", unsafe_allow_html=True)
 if st.sidebar.button("🔓 Güvenli Çıkış Yap", key="btn_logout"):
     st.session_state["authenticated"] = False
     st.session_state["username"] = ""
+    st.query_params.clear()
     st.rerun()
 
 st.sidebar.markdown("<div style='text-align: center; color: #64748b; font-size: 0.75rem; margin-top:30px;'>AS43 Asansör & Metal ERP v2.0</div>", unsafe_allow_html=True)
