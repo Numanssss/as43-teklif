@@ -176,24 +176,24 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     
     class PDF(FPDF):
         def header(self):
-           if os.path.exists("logo.png"):
-                self.set_fill_color(30, 41, 59)
-                self.rect(10, 8, 32, 14, 'F')
-                self.image("logo.png", 11, 9, 30)
-                self.set_x(45)
-                self.set_font('Helvetica', 'B', 14)
-                self.set_text_color(217, 119, 6) # Amber kurumsal renk
-                self.cell(0, 8, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='L')
-                self.set_x(45)
-                self.set_font('Helvetica', '', 9)
-                self.set_text_color(100, 116, 139)
-                self.cell(0, 5, 'Teklif & Operasyon Hizmetleri Detay Formu', ln=True, align='L')
-          else:
+        if os.path.exists("logo.png"):
+            self.set_fill_color(30, 41, 59)
+            self.rect(10, 8, 32, 14, 'F')
+            self.image("logo.png", 11, 9, 30)
+            self.set_x(45)
+            self.set_font('Helvetica', 'B', 14)
+            self.set_text_color(217, 119, 6)
+            self.cell(0, 8, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='L')
+            self.set_x(45)
+            self.set_font('Helvetica', '', 9)
+            self.set_text_color(100, 116, 139)
+            self.cell(0, 5, 'Teklif & Operasyon Hizmetleri Detay Formu', ln=True, align='L')
+        else:
             self.set_font('Helvetica', 'B', 15)
             self.set_text_color(217, 119, 6)
             self.cell(0, 10, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='C')
-        
-        self.set_draw_color(217, 119, 6)  # Bu satır 'else' ile aynı hizada olmalı
+            
+        self.set_draw_color(217, 119, 6)
         self.line(10, 27, 200, 27)
         self.ln(8)
             
