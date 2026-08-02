@@ -19,6 +19,7 @@ import urllib.request
 import urllib.parse
 import json
 import hashlib
+import base64
 
 # --- SAYFA YAPILANDIRMASI ---
 st.set_page_config(page_title="AS43 Grup | Metal & Asansör ERP", layout="wide", page_icon="💠")
@@ -121,7 +122,7 @@ st.markdown("""
         margin-bottom: 10px;
     }
     .logo-img {
-        max-width: 240px;
+        max-width: 220px;
         filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4)) brightness(1.0);
         background-color: transparent;
     }
@@ -169,7 +170,6 @@ FILE_GIDERLER = "metal_giderler.csv"
 FILE_GELIRLER = "metal_gelirler.csv"
 FILE_SAC_FIYATLARI = "sac_fiyatlari.csv"
 FILE_TEKLIFLER = "teklifler.csv"
-FILE_SMTP_AYARLARI = "smtp_ayarlari.json"
 
 def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_kalinligi, net_agirlik, fire_orani, hammadde_maliyeti_eur, lazer_suresi, lazer_maliyeti_eur, bukum_suresi, bukum_maliyeti_eur, iscilik_suresi, iscilik_maliyeti_eur, sabit_gider_payi, sabit_gider_maliyeti_eur, toplam_maliyet_eur, liste_fiyati_eur, liste_fiyati_try, active_rate, iskonto_orani, iskonto_tutari_eur, kdv_orani, kdv_tutari_eur, genel_toplam_eur):
     from fpdf import FPDF
@@ -220,7 +220,6 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.alias_nb_pages()
     pdf.add_page()
     
-    # Sağ Üst Köşe: Teklif No ve Hazırlayan Bilgisi
     pdf.set_font('Helvetica', 'B', 10)
     pdf.set_text_color(30, 41, 59)
     pdf.cell(0, 5, f"Teklif No: {clean(teklif_no)}", ln=True, align='R')
@@ -229,7 +228,6 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.cell(0, 5, f"Tarih: {datetime.date.today().strftime('%d.%m.%Y')}", ln=True, align='R')
     pdf.ln(3)
     
-    # Müşteri Bilgileri
     pdf.set_font('Helvetica', 'B', 12)
     pdf.set_text_color(217, 119, 6)
     pdf.cell(0, 8, "MUSTERI VE HESAP BILGILERI", ln=True)
@@ -253,7 +251,6 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.cell(0, 6, f"{net_agirlik:.2f} kg (Fire Orani: %{fire_orani:.0f})", 0, 1)
     pdf.ln(4)
     
-    # Tablo Detayları
     pdf.set_font('Helvetica', 'B', 11)
     pdf.set_text_color(217, 119, 6)
     pdf.cell(0, 8, "MALIYET VE OPERASYON DETAYLARI", ln=True)
@@ -295,7 +292,6 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.cell(135, 7, "Toplam Net Maliyet:  ", 1, 0, 'R')
     pdf.cell(55, 7, f"{toplam_maliyet_eur:.2f} EUR  ", 1, 1, 'R')
     
-    # İskonto, KDV ve Genel Toplam Hesaplamaları
     pdf.cell(135, 6, f"Liste Satis Fiyati (Brut):  ", 1, 0, 'R')
     pdf.cell(55, 6, f"{liste_fiyati_eur:.2f} EUR  ", 1, 1, 'R')
     
@@ -319,7 +315,6 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.cell(0, 6, f"Euro Kuru: {active_rate:.2f} TRY | TL Karsiligi: {(genel_toplam_eur * active_rate):,.2f} TL", ln=True, align='R')
     pdf.ln(8)
     
-    # Kaşe ve İmza Alanı
     pdf.set_font('Helvetica', 'B', 10)
     pdf.set_text_color(217, 119, 6)
     pdf.cell(0, 6, "KASE VE IMZA ONAY ALANI", ln=True)
@@ -330,7 +325,6 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.set_font('Helvetica', 'B', 9)
     y_start = pdf.get_y()
     
-    # Firma Kaşe Alanı (Sol)
     pdf.set_xy(15, y_start)
     pdf.cell(80, 5, "AS43 GRUP LAZER & METAL", ln=True, align='C')
     pdf.set_x(15)
@@ -340,7 +334,6 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.set_x(15)
     pdf.cell(80, 4, "____________________________", ln=True, align='C')
     
-    # Müşteri Onay Alanı (Sağ)
     pdf.set_xy(110, y_start)
     pdf.set_font('Helvetica', 'B', 9)
     pdf.cell(80, 5, clean(musteri_adi), ln=True, align='C')
@@ -353,40 +346,8 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     
     return pdf.output()
 
-def send_email_with_pdf(receiver_email, subject, body, pdf_bytes, filename, smtp_server, smtp_port, sender_email, sender_password):
-    import smtplib
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    from email.mime.base import MIMEBase
-    from email import encoders
-    
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = receiver_email
-        msg['Subject'] = subject
-        
-        msg.attach(MIMEText(body, 'plain'))
-        
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(pdf_bytes)
-        encoders.encode_base64(part)
-        part.add_header('Content-Disposition', f'attachment; filename={filename}')
-        msg.attach(part)
-        
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
-        server.quit()
-        return True, "E-posta başarıyla gönderildi!"
-    except Exception as e:
-        return False, f"E-posta gönderim hatası: {str(e)}"
-
-# Varsayılan kolon şablonları
 DEFAULT_HEADERS_ASANSOR = ["Asansör_ID", "Konum", "Durum (Etiket)", "Son_Bakım_Notları", "Bekleyen_Eksikler", "Adres"]
 
-# --- HATA ÖNLEME: VERİ TABANLARI YOKSA OLUŞTURMA ---
 def init_databases():
     if not os.path.exists(FILE_ASANSOR):
         df = pd.DataFrame(columns=DEFAULT_HEADERS_ASANSOR)
@@ -438,7 +399,6 @@ def init_databases():
 
 init_databases()
 
-# --- VERİLERİ YÜKLEME ---
 try:
     df_asansor = pd.read_csv(FILE_ASANSOR, encoding='utf-8-sig').dropna(how='all')
     df_asansor.columns = [c.strip() for c in df_asansor.columns]
@@ -459,7 +419,6 @@ except Exception as e:
     st.error(f"Veritabanı yükleme hatası: {e}")
     st.stop()
 
-# Sütun denetimi
 if "Iletim_Durumu" not in df_teklifler.columns:
     df_teklifler["Iletim_Durumu"] = "Gönderilmedi"
 if "Odeme_Durumu" not in df_teklifler.columns:
@@ -472,8 +431,8 @@ if "id" in st.query_params:
     scan_id = st.query_params["id"]
     
     st.markdown("<div class='logo-container'>", unsafe_allow_html=True)
-    if os.path.exists("asansor_logo.png"):
-        st.markdown(f"<img src='data:image/png;base64,{urllib.parse.quote(open('asansor_logo.png', 'rb').read())}' class='logo-img'>", unsafe_allow_html=True)
+    if os.path.exists("logo.png"):
+        st.markdown(f"<img src='data:image/png;base64,{urllib.parse.quote(open('logo.png', 'rb').read())}' class='logo-img'>", unsafe_allow_html=True)
     else:
         st.markdown("<h2 style='color:#F59E0B;'>AS43 ASANSÖR</h2>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -555,9 +514,9 @@ if not st.session_state["authenticated"]:
     col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
     with col_l2:
         with st.form("login_form"):
-            if os.path.exists("asansor_logo.png"):
-                import base64
-                with open("asansor_logo.png", "rb") as image_file:
+            # GİRİŞ EKRANI LOGOSU (logo.png)
+            if os.path.exists("logo.png"):
+                with open("logo.png", "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read()).decode()
                 st.markdown(f"""
                     <div class="logo-container">
@@ -624,21 +583,22 @@ active_rate = st.session_state["live_rate"] if st.session_state["exchange_mode"]
 
 # --- SOL MENÜ (SIDEBAR) BÖLÜMÜ ---
 st.sidebar.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-if os.path.exists("asansor_logo.png"):
-    import base64
-    with open("asansor_logo.png", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
+
+# SOL MENÜ ÜST KISIM LOGO (logo.png)
+if os.path.exists("logo.png"):
+    with open("logo.png", "rb") as image_file:
+        encoded_string_sb = base64.b64encode(image_file.read()).decode()
     st.sidebar.markdown(f"""
         <div class="logo-container">
-            <img src="data:image/png;base64,{encoded_string}" class="logo-img" style="max-width:140px;" />
+            <img src="data:image/png;base64,{encoded_string_sb}" class="logo-img" style="max-width:180px;" />
         </div>
     """, unsafe_allow_html=True)
 else:
     st.sidebar.markdown("<h2 style='color:#F59E0B; margin:0;'>AS43 GRUP</h2>", unsafe_allow_html=True)
+
 st.sidebar.markdown("</div>", unsafe_allow_html=True)
 
-st.sidebar.markdown(f"<div class='sidebar-title'>AS43 YÖNETİM PORTALI</div>", unsafe_allow_html=True)
-st.sidebar.markdown(f"<div style='text-align:center; color:#94a3b8; font-size:0.85rem;'>👤 Hoş Geldiniz, <b>{st.session_state['username']}</b></div>", unsafe_allow_html=True)
+st.sidebar.markdown(f"<div style='text-align:center; color:#94a3b8; font-size:0.85rem; margin-top:5px;'>👤 Hoş Geldiniz, <b>{st.session_state['username']}</b></div>", unsafe_allow_html=True)
 st.sidebar.markdown("---")
 
 secilen_modul = st.sidebar.radio(
@@ -817,10 +777,16 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
             )
             
             st.success(f"Teklif başarıyla kaydedildi! Teklif No: {teklif_no}")
+            def clean_name(t):
+                if not t: return ""
+                t = str(t)
+                replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
+                for k, v in replacements.items(): t = t.replace(k, v)
+                return t
             st.download_button(
                 label="📥 Resmi PDF Teklif Belgesini İndir",
                 data=pdf_bytes,
-                file_name=f"{teklif_no}_{clean(musteri_adi)}.pdf",
+                file_name=f"{teklif_no}_{clean_name(musteri_adi)}.pdf",
                 mime="application/pdf"
             )
 
