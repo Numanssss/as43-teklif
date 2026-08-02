@@ -23,7 +23,7 @@ import hashlib
 # --- SAYFA YAPILANDIRMASI ---
 st.set_page_config(page_title="AS43 Grup | Metal & Asansör ERP", layout="wide", page_icon="💠")
 
-# --- KURUMSAL BRANDING & PREMIUM CSS (Koyu Tema & Glowing Efektler) ---
+# --- KURUMSAL BRANDING & PREMIUM CSS (Koyu Tema & Glowing Efektler - Turuncu/Kehribar Tonları) ---
 st.markdown("""
     <style>
     /* Global sayfa arka planı */
@@ -32,15 +32,15 @@ st.markdown("""
         color: #f8fafc;
     }
     
-    /* Üst Kurumsal Çizgi (Electric Blue) */
+    /* Üst Kurumsal Çizgi (Premium Turuncu) */
     header[data-testid="stHeader"] {
-        border-top: 6px solid #2F5DFF;
+        border-top: 6px solid #F59E0B;
         background-color: #0f172a;
     }
     
     /* Başlık stili */
     .main-title {
-        background: linear-gradient(135deg, #F59E0B 0%, #2F5DFF 100%);
+        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-family: 'Montserrat', sans-serif;
@@ -72,8 +72,8 @@ st.markdown("""
     }
     .metric-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 20px -3px rgba(47, 93, 255, 0.2);
-        border-color: #2F5DFF;
+        box-shadow: 0 12px 20px -3px rgba(245, 158, 11, 0.25);
+        border-color: #F59E0B;
     }
     .metric-val {
         font-size: 2.0rem;
@@ -99,20 +99,20 @@ st.markdown("""
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .stock-card:hover {
-        border-color: #2F5DFF;
-        box-shadow: 0 4px 12px rgba(47, 93, 255, 0.15);
+        border-color: #F59E0B;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
     }
     
-    /* Teklif Sihirbazı Fiyat Özet Kartı */
+    /* Teklif Sihirbazı Fiyat Özet Kartı (Turuncu Glow) */
     .quote-result-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        border: 2px solid #2F5DFF;
+        border: 2px solid #F59E0B;
         border-radius: 14px;
         padding: 1.5rem;
-        box-shadow: 0 0 15px rgba(47, 93, 255, 0.25);
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }
     
-    /* Koyu Temaya Uygun Logo Tasarımı (Beyaz Arka Planı İptal Eden Stil) */
+    /* Koyu Temaya Özel Transparent Logo Taşıyıcı */
     .logo-container {
         display: flex;
         justify-content: center;
@@ -121,27 +121,26 @@ st.markdown("""
         margin-bottom: 10px;
     }
     .logo-img {
-        max-width: 220px;
-        filter: drop-shadow(0 0 10px rgba(47, 93, 255, 0.4)) brightness(0.95);
-        border-radius: 10px;
+        max-width: 240px;
+        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4)) brightness(1.0);
         background-color: transparent;
     }
     
-    /* Özelleştirilmiş Buton Stili (Electric Mavi Gradyan) */
+    /* Özelleştirilmiş Buton Stili (Turuncu Gradyan) */
     div.stButton > button { 
-        background: linear-gradient(135deg, #2B328C 0%, #2F5DFF 100%) !important; 
+        background: linear-gradient(135deg, #B45309 0%, #F59E0B 100%) !important; 
         color: white !important; 
         border: none !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
         padding: 0.6rem 1.8rem !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 4px 6px -1px rgba(47, 93, 255, 0.3) !important;
+        box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3) !important;
         width: 100%;
     }
     div.stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 15px -3px rgba(47, 93, 255, 0.5) !important;
+        box-shadow: 0 8px 15px -3px rgba(245, 158, 11, 0.5) !important;
     }
     
     /* Durum Etiketleri */
@@ -177,7 +176,6 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     
     class PDF(FPDF):
         def header(self):
-            # Koyu tema uyumlu başlık tasarımı
             if os.path.exists("asansor_logo.png"):
                 self.set_fill_color(30, 41, 59)
                 self.rect(10, 8, 32, 14, 'F')
@@ -537,12 +535,12 @@ if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 
 if not st.session_state["authenticated"]:
-    # Giriş Ekranına Özel CSS Enjeksiyonu
+    # Giriş Ekranına Özel CSS Enjeksiyonu (Maksimum Turuncu Detaylar)
     st.markdown("""
         <style>
         div[data-testid="stForm"] {
             background: #1e293b !important;
-            border: 2px solid #2F5DFF !important;
+            border: 2px solid #F59E0B !important;
             border-radius: 16px !important;
             padding: 2.5rem !important;
             max-width: 480px !important;
@@ -558,7 +556,7 @@ if not st.session_state["authenticated"]:
     col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
     with col_l2:
         with st.form("login_form"):
-            # Koyu temaya uygun şekilde logo ekleniyor (beyaz arka plan kaldırılmış ve premium filtre uygulanmış)
+            # Logo ve Firma Görseli Koyu Temaya Uygun Olarak Yükleniyor
             if os.path.exists("asansor_logo.png"):
                 import base64
                 with open("asansor_logo.png", "rb") as image_file:
@@ -569,7 +567,7 @@ if not st.session_state["authenticated"]:
                     </div>
                 """, unsafe_allow_html=True)
             else:
-                st.markdown("<h1 style='color: #2F5DFF; font-weight:800; text-align:center;'>AS43 GRUP</h1>", unsafe_allow_html=True)
+                st.markdown("<h1 style='color: #F59E0B; font-weight:800; text-align:center;'>AS43 GRUP</h1>", unsafe_allow_html=True)
                 
             st.markdown("<h3 style='margin-top: 5px; margin-bottom: 5px; color:#f8fafc; text-align:center;'>Yönetim Portalı Girişi</h3>", unsafe_allow_html=True)
             st.markdown("<p style='color: #94a3b8; font-size: 0.85rem; text-align:center;'>Güvenli ERP ve Teklif Yönetim Alanı</p>", unsafe_allow_html=True)
@@ -663,7 +661,7 @@ st.sidebar.markdown("#### 💶 EUR/TRY Döviz Kuru")
 st.sidebar.markdown(
     f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; text-align: center;'><span style='font-size: 0.8rem; color:#94a3b8; font-weight:600;'>AKTİF EUR/TRY KURU</span><br>"
     f"<span style='font-size: 1.4rem; font-weight: 800; color: #22c55e;'>{active_rate:.4f} TL</span><br>"
-    f"<span style='font-size: 0.75rem; color:#3b82f6;'>Mod: {st.session_state['exchange_mode']}</span>"
+    f"<span style='font-size: 0.75rem; color:#f59e0b;'>Mod: {st.session_state['exchange_mode']}</span>"
     f"</div>", 
     unsafe_allow_html=True
 )
@@ -830,7 +828,7 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                     <td style='padding: 6px 0; color:#3b82f6;'>KDV (%{kdv_orani}):</td>
                     <td style='padding: 6px 0; text-align:right; color:#3b82f6;'>{kdv_tutari_eur:.2f} EUR</td>
                 </tr>
-                <tr style='border-bottom: 2px solid #2F5DFF; font-weight:bold; color: #22c55e;'>
+                <tr style='border-bottom: 2px solid #F59E0B; font-weight:bold; color: #22c55e;'>
                     <td style='padding: 8px 0; font-size:1.1rem;'>GENEL TOPLAM (KDV DAHİL):</td>
                     <td style='padding: 8px 0; text-align:right; font-size:1.1rem;'>{genel_toplam_eur:.2f} EUR / {genel_toplam_try:,.2f} TL</td>
                 </tr>
@@ -955,8 +953,9 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                                 "sender_password": smtp_sifre
                             }
                             try:
-                                with open(FILE_SMTP_AYARLARI, "w", encoding="utf-8") as f:
-                                    json.dump(yeni_config, f, ensure_ascii=False, indent=4)
+                                Guide = open(FILE_SMTP_AYARLARI, "w", encoding="utf-8")
+                                json.dump(yeni_config, Guide, ensure_ascii=False, indent=4)
+                                Guide.close()
                             except Exception:
                                 pass
                                 
@@ -979,7 +978,6 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                             )
                             if success:
                                 st.success(msg)
-                                # Kayıtlarda e-posta iletildi durumunu güncelle
                                 if not df_teklifler.empty and teklif_no_goster in df_teklifler["Teklif_ID"].values:
                                     idx = df_teklifler[df_teklifler["Teklif_ID"] == teklif_no_goster].index[0]
                                     df_teklifler.at[idx, "Iletim_Durumu"] = "E-posta ile İletildi"
@@ -1017,10 +1015,8 @@ elif secilen_modul == "📋 Geçmiş Teklifler & Takip":
             
         st.markdown(f"Bulunan Teklif Sayısı: **{len(df_filt_teklif)}**")
         
-        # HTML ile Renkli Tablo Gösterimi
         styled_rows = []
         for idx, row in df_filt_teklif.iterrows():
-            # Durum Badge Belirleme
             if row['Durum'] == "Onaylandı":
                 durum_html = "<span class='badge badge-onay'>Onaylandı</span>"
             elif row['Durum'] == "Reddedildi":
@@ -1028,7 +1024,6 @@ elif secilen_modul == "📋 Geçmiş Teklifler & Takip":
             else:
                 durum_html = "<span class='badge badge-bekle'>Beklemede</span>"
                 
-            # Ödeme Badge Belirleme
             if row['Odeme_Durumu'] == "Ödeme Alındı":
                 odeme_html = "<span class='badge badge-odeme-alindi'>Ödeme Alındı</span>"
             elif row['Odeme_Durumu'] == "Vadesi Geçti":
@@ -1036,7 +1031,6 @@ elif secilen_modul == "📋 Geçmiş Teklifler & Takip":
             else:
                 odeme_html = "<span class='badge badge-odeme-bekliyor'>Ödeme Bekleniyor</span>"
                 
-            # İletim Durumu
             iletim_html = f"<span style='color: {'#22c55e' if row['Iletim_Durumu'] == 'E-posta ile İletildi' else '#94a3b8'};'>{row['Iletim_Durumu']}</span>"
             
             styled_rows.append({
@@ -1060,7 +1054,6 @@ elif secilen_modul == "📋 Geçmiş Teklifler & Takip":
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("---")
         
-        # Güncelleme Paneli
         st.subheader("🔄 Teklif Durumunu & Ödeme Durumunu Güncelle")
         up_col1, up_col2, up_col3, up_col4 = st.columns([1.5, 1.5, 1.5, 1])
         
@@ -1095,7 +1088,6 @@ elif secilen_modul == "📋 Geçmiş Teklifler & Takip":
                 st.success(f"{secilen_teklif_id} nolu teklif başarıyla güncellendi!")
                 st.rerun()
 
-        # Silme
         st.markdown("---")
         st.subheader("⚠️ Kayıt Sil")
         sil_col1, sil_col2 = st.columns([3, 1])
