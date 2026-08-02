@@ -52,9 +52,11 @@ if not st.session_state['logged_in']:
     st.stop()
 
 # --- ANA UYGULAMA ---
-st.sidebar.image("logo.png", use_container_width=True)
 st.sidebar.markdown("""
-    <hr style='margin: 5px 0 15px 0; border-color: #333;'>
+    <div style='background-color: #0e1117; padding: 10px; text-align: center; border-radius: 8px;'>
+        <img src='logo.png' style='width: 100%; max-width: 180px; display: block; margin: 0 auto;'/>
+    </div>
+    <hr style='margin: 10px 0 15px 0; border-color: #333;'>
 """, unsafe_allow_html=True)
 
 st.sidebar.write(f"Hoş geldiniz, **{st.session_state['user_name']}**")
