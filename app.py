@@ -24,7 +24,7 @@ import base64
 # --- SAYFA YAPILANDIRMASI ---
 st.set_page_config(page_title="AS43 Grup | Metal & Asansör ERP", layout="wide", page_icon="💠")
 
-# --- KURUMSAL BRANDING & PREMIUM CSS (Koyu Tema & Glowing Efektler - Turuncu/Kehribar Tonları) ---
+# --- KURUMSAL BRANDING & PREMIUM CSS (Koyu Tema & Arka Plansız Logo Efekti) ---
 st.markdown("""
     <style>
     /* Global sayfa arka planı */
@@ -113,18 +113,20 @@ st.markdown("""
         box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }
     
-    /* Koyu Temaya Özel Transparent Logo Taşıyıcı */
+    /* Koyu Temaya Tam Uyumlu Şeffaf Logo Taşıyıcı */
     .logo-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 10px;
-        margin-bottom: 10px;
+        padding: 5px;
+        margin-bottom: 5px;
+        background: transparent !important;
     }
     .logo-img {
-        max-width: 220px;
-        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4)) brightness(1.0);
-        background-color: transparent;
+        max-width: 200px;
+        background: transparent !important;
+        mix-blend-mode: screen; /* Beyaz ve transparan alanları koyu arka planda kusursuz gizler */
+        filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.3));
     }
     
     /* Özelleştirilmiş Buton Stili (Turuncu Gradyan) */
@@ -590,7 +592,7 @@ if os.path.exists("logo.png"):
         encoded_string_sb = base64.b64encode(image_file.read()).decode()
     st.sidebar.markdown(f"""
         <div class="logo-container">
-            <img src="data:image/png;base64,{encoded_string_sb}" class="logo-img" style="max-width:180px;" />
+            <img src="data:image/png;base64,{encoded_string_sb}" class="logo-img" style="max-width:160px;" />
         </div>
     """, unsafe_allow_html=True)
 else:
