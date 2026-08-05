@@ -29,10 +29,11 @@ st.set_page_config(page_title="AS43 Grup | Metal & Asansör ERP", layout="wide",
 
 # --- LOGO ARKA PLANINI ŞEFFAFLAŞTIRAN YARDIMCI FONKSİYON ---
 def get_transparent_logo_base64():
-    if not os.path.exists("logo.png"):
+    logo_path = "asansor_logo.png" if os.path.exists("asansor_logo.png") else ("logo.png" if os.path.exists("logo.png") else "")
+    if not logo_path:
         return None
     try:
-        img = Image.open("logo.png").convert("RGBA")
+        img = Image.open(logo_path).convert("RGBA")
         datas = img.getdata()
         new_data = []
         # Beyaz ve yakın tonlarını şeffafa çevir
@@ -48,34 +49,39 @@ def get_transparent_logo_base64():
         return base64.b64encode(buffered.getvalue()).decode()
     except Exception:
         try:
-            with open("logo.png", "rb") as f:
+            with open(logo_path, "rb") as f:
                 return base64.b64encode(f.read()).decode()
         except Exception:
             return None
 
-# --- KURUMSAL BRANDING & PREMIUM CSS ---
+# --- KURUMSAL BRANDING & PREMIUM CSS (Soft Light Theme) ---
 st.markdown("""
     <style>
-    /* Global sayfa arka planı ve Pull-to-Refresh Engelleme */
+    /* Global sayfa arka planı (Soft Light Theme) */
     html, body {
-        background-color: #0f172a;
-        color: #f8fafc;
+        background-color: #f8fafc;
+        color: #334155;
         margin: 0 !important;
         padding: 0 !important;
-        overscroll-behavior-y: contain !important; /* Sayfa yenilemeyi tamamen engeller */
-        overscroll-behavior-x: none !important;
+        overscroll-behavior-y: contain !important;
     }
     
-    /* Mobil Kaydırma ve Stabilizasyon */
+    /* App view container */
     [data-testid="stAppViewContainer"], [data-testid="stApp"] {
-        background-color: #0f172a;
-        color: #f8fafc;
+        background-color: #f8fafc;
+        color: #334155;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
-        overscroll-behavior-y: contain !important; /* Alt container yenilemesini engeller */
+        overscroll-behavior-y: contain !important;
     }
     
-    /* GPU Donanım Hızlandırması (Arayüz Takılmalarını ve Kaydırma Kilitlenmelerini Engeller) */
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-right: 1px solid #e2e8f0 !important;
+    }
+    
+    /* GPU Donanım Hızlandırması */
     .main .block-container {
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
@@ -84,13 +90,13 @@ st.markdown("""
     
     /* Üst Kurumsal Çizgi (Premium Turuncu) */
     header[data-testid="stHeader"] {
-        border-top: 6px solid #F59E0B;
-        background-color: #0f172a;
+        border-top: 6px solid #f97316;
+        background-color: #f8fafc;
     }
     
     /* Başlık stili */
     .main-title {
-        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-family: 'Montserrat', sans-serif;
@@ -100,7 +106,7 @@ st.markdown("""
         margin-bottom: 0.2rem;
     }
     .main-subtitle {
-        color: #94a3b8;
+        color: #64748b;
         font-family: 'Montserrat', sans-serif;
         text-align: center;
         font-size: 0.95rem;
@@ -112,27 +118,29 @@ st.markdown("""
     
     /* Gelişmiş Bilgi Kartları (KPI Cards) */
     .metric-card {
-        background: #1e293b;
-        border: 1px solid #334155;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 14px;
         padding: 1.3rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         text-align: center;
         transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        color: #334155;
     }
     .metric-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 20px -3px rgba(245, 158, 11, 0.25);
-        border-color: #F59E0B;
+        box-shadow: 0 12px 20px -3px rgba(249, 115, 22, 0.15);
+        border-color: #f97316;
     }
     .metric-val {
         font-size: 2.0rem;
         font-weight: 800;
         margin: 0.3rem 0;
+        color: #0f172a;
     }
     .metric-label {
         font-size: 0.8rem;
-        color: #94a3b8;
+        color: #64748b;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.08em;
@@ -140,26 +148,28 @@ st.markdown("""
     
     /* Stok Kart Stilleri */
     .stock-card {
-        background: #1e293b;
-        border: 1px solid #334155;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
         padding: 1.2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         margin-bottom: 1rem;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        color: #334155;
     }
     .stock-card:hover {
-        border-color: #F59E0B;
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        border-color: #f97316;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
     }
     
     /* Teklif Sihirbazı Fiyat Özet Kartı (Turuncu Glow) */
     .quote-result-card {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        border: 2px solid #F59E0B;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 2px solid #f97316;
         border-radius: 14px;
         padding: 1.5rem;
-        box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        box-shadow: 0 8px 30px rgba(249, 115, 22, 0.08);
+        color: #334155;
     }
     
     /* Şeffaf Logo Stili */
@@ -178,19 +188,19 @@ st.markdown("""
     
     /* Özelleştirilmiş Buton Stili (Turuncu Gradyan) */
     div.stButton > button { 
-        background: linear-gradient(135deg, #B45309 0%, #F59E0B 100%) !important; 
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%) !important; 
         color: white !important; 
         border: none !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
         padding: 0.6rem 1.8rem !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3) !important;
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2) !important;
         width: 100%;
     }
     div.stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 15px -3px rgba(245, 158, 11, 0.5) !important;
+        box-shadow: 0 8px 15px -3px rgba(249, 115, 22, 0.3) !important;
     }
     
     /* Durum Etiketleri */
@@ -202,13 +212,13 @@ st.markdown("""
         display: inline-block;
         text-align: center;
     }
-    .badge-onay { background-color: #15803d; color: #f8fafc; }
-    .badge-bekle { background-color: #a16207; color: #f8fafc; }
-    .badge-red { background-color: #b91c1c; color: #f8fafc; }
+    .badge-onay { background-color: #dcfce7; color: #166534; }
+    .badge-bekle { background-color: #fef3c7; color: #92400e; }
+    .badge-red { background-color: #fee2e2; color: #991b1b; }
     
-    .badge-odeme-alindi { background-color: #1d4ed8; color: #f8fafc; }
-    .badge-odeme-bekliyor { background-color: #4b5563; color: #f8fafc; }
-    .badge-odeme-gecikti { background-color: #b91c1c; color: #f8fafc; }
+    .badge-odeme-alindi { background-color: #dbeafe; color: #1e40af; }
+    .badge-odeme-bekliyor { background-color: #f3f4f6; color: #374151; }
+    .badge-odeme-gecikti { background-color: #fee2e2; color: #991b1b; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -1403,6 +1413,13 @@ st.sidebar.markdown("<div style='text-align: center; color: #64748b; font-size: 
 # 1. MODÜL: AKILLI TEKLİF SİHİRBAZI
 # ========================================================
 if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
+    logo_b64 = get_transparent_logo_base64()
+    if logo_b64:
+        st.markdown(f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 8px;">
+                <img src="data:image/png;base64,{logo_b64}" style="max-height: 80px;" />
+            </div>
+        """, unsafe_allow_html=True)
     st.markdown("<div class='main-title'>Akıllı Maliyet & Teklif Sihirbazı</div>", unsafe_allow_html=True)
     st.markdown("<div class='main-subtitle'>Sac Kesim, Büküm, İşçilik ve Operasyon Hesaplama Modülü</div>", unsafe_allow_html=True)
     
