@@ -365,53 +365,63 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.cell(0, 6, f"Euro Kuru: {active_rate:.2f} TRY | TL Karsiligi: {(genel_toplam_eur * active_rate):,.2f} TL", ln=True, align='R')
     pdf.ln(8)
     
-    pdf.set_y(-55)
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.set_text_color(217, 119, 6)
-    pdf.cell(0, 6, "KASE VE IMZA ONAY ALANI", ln=True)
-    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-    pdf.ln(3)
-    
-    pdf.set_text_color(0, 0, 0)
-    pdf.set_font('Helvetica', 'B', 9)
-    y_start = pdf.get_y()
-    
-    pdf.set_xy(15, y_start)
-    pdf.cell(80, 5, "AS43 GRUP LAZER & METAL", ln=True, align='C')
-    pdf.set_x(15)
-    pdf.set_font('Helvetica', '', 8)
-    pdf.cell(80, 4, "(Firma Kase & Yetkili Imza)", ln=True, align='C')
-    pdf.ln(12)
-    pdf.set_x(15)
-    pdf.cell(80, 4, "____________________________", ln=True, align='C')
-    
-    pdf.set_xy(110, y_start)
-    pdf.set_font('Helvetica', 'B', 9)
-    pdf.cell(80, 5, clean(musteri_adi), ln=True, align='C')
-    pdf.set_xy(110, pdf.get_y())
-    pdf.set_font('Helvetica', '', 8)
-    pdf.cell(80, 4, "(Alici Firma Kase & Imza)", ln=True, align='C')
-    pdf.ln(12)
-    pdf.set_xy(110, pdf.get_y())
-    pdf.cell(80, 4, "____________________________", ln=True, align='C')
+    if not (detay_data and images_paths):
+        pdf.set_y(-55)
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_text_color(245, 158, 11)
+        pdf.cell(0, 6, "KASE VE IMZA ONAY ALANI", ln=True)
+        pdf.set_draw_color(245, 158, 11)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(3)
+        
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font('Helvetica', 'B', 9)
+        y_start = pdf.get_y()
+        
+        pdf.set_xy(15, y_start)
+        pdf.cell(80, 5, "AS43 GRUP LAZER & METAL", ln=True, align='C')
+        pdf.set_x(15)
+        pdf.set_font('Helvetica', '', 8)
+        pdf.cell(80, 4, "(Firma Kase & Yetkili Imza)", ln=True, align='C')
+        pdf.ln(12)
+        pdf.set_x(15)
+        pdf.cell(80, 4, "____________________________", ln=True, align='C')
+        
+        pdf.set_xy(110, y_start)
+        pdf.set_font('Helvetica', 'B', 9)
+        pdf.cell(80, 5, clean(musteri_adi), ln=True, align='C')
+        pdf.set_xy(110, pdf.get_y())
+        pdf.set_font('Helvetica', '', 8)
+        pdf.cell(80, 4, "(Alici Firma Kase & Imza)", ln=True, align='C')
+        pdf.ln(12)
+        pdf.set_xy(110, pdf.get_y())
+        pdf.cell(80, 4, "____________________________", ln=True, align='C')
     
     if detay_data and images_paths:
         pdf.add_page()
-        pdf.set_draw_color(0, 0, 0)
+        pdf.set_draw_color(245, 158, 11)
         pdf.set_line_width(0.3)
         pdf.rect(10, 10, 190, 22)
         pdf.line(75, 10, 75, 32)
         
-        if os.path.exists("logo.png"):
-            pdf.image("logo.png", 12, 13, 58)
+        logo_path = "asansor_logo.png" if os.path.exists("asansor_logo.png") else ("logo.png" if os.path.exists("logo.png") else "")
+        if logo_path:
+            pdf.set_fill_color(255, 243, 219)
+            pdf.rect(10, 10, 65, 22, 'F')
+            pdf.rect(10, 10, 65, 22)
+            pdf.image(logo_path, 12, 13, 61)
         else:
             pdf.set_font("Helvetica", "B", 14)
             pdf.set_xy(12, 18)
-            pdf.cell(58, 8, "AS43 GRUP", align="C")
+            pdf.set_text_color(245, 158, 11)
+            pdf.cell(63, 8, "AS43 GRUP", align="C")
+            pdf.set_text_color(0, 0, 0)
             
         pdf.set_font("Helvetica", "B", 12)
+        pdf.set_text_color(245, 158, 11)
         pdf.set_xy(75, 15)
         pdf.cell(70, 12, "ASANSOR IMALAT TEKLIF EKI", align="C")
+        pdf.set_text_color(0, 0, 0)
         
         pdf.line(145, 10, 145, 32)
         pdf.line(145, 15.5, 200, 15.5)
@@ -420,37 +430,20 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
         pdf.line(175, 10, 175, 21)
         pdf.line(175, 26.5, 175, 32)
         
-        pdf.set_font("Helvetica", "B", 6)
+        pdf.set_font("Helvetica", "B", 5.5)
         pdf.set_xy(146, 11)
-        pdf.cell(28, 4, "DOKUMAN NO")
+        pdf.cell(28, 4, "DOKUMAN NO: ONY-FRM-026")
         pdf.set_xy(176, 11)
-        pdf.cell(24, 4, "REVIZYON NO")
-        pdf.set_font("Helvetica", "", 7)
-        pdf.set_xy(163, 11)
-        pdf.cell(10, 4, "ONY-FRM-026")
-        pdf.set_xy(193, 11)
-        pdf.cell(10, 4, "1")
+        pdf.cell(24, 4, "REV. NO: 1")
         
-        pdf.set_font("Helvetica", "B", 6)
         pdf.set_xy(146, 16.5)
-        pdf.cell(28, 4, "YAYIN TARIHI")
-        pdf.set_font("Helvetica", "", 7)
-        pdf.set_xy(163, 16.5)
-        pdf.cell(10, 4, "15.12.2022")
+        pdf.cell(50, 4, "YAYIN TARIHI: 15.12.2022")
         
-        pdf.set_font("Helvetica", "B", 6)
         pdf.set_xy(146, 22)
-        pdf.cell(50, 4, "REVIZYON TARIHI")
-        pdf.set_font("Helvetica", "", 7)
-        pdf.set_xy(170, 22)
-        pdf.cell(20, 4, "01.06.2023")
+        pdf.cell(50, 4, "REVIZYON TARIHI: 01.06.2023")
         
-        pdf.set_font("Helvetica", "B", 6)
         pdf.set_xy(146, 27.5)
-        pdf.cell(28, 4, "SAYFA NO")
-        pdf.set_font("Helvetica", "", 7)
-        pdf.set_xy(176, 27.5)
-        pdf.cell(24, 4, "2 / 2")
+        pdf.cell(28, 4, "SAYFA NO: 2 / 2")
         
         pdf.set_fill_color(245, 158, 11)
         pdf.rect(10, 32, 190, 5, 'F')
@@ -542,18 +535,34 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
             y_pos = 81 + (idx * 5)
             pdf.set_xy(12, y_pos)
             pdf.cell(45, 4, label + ":")
-            pdf.set_font("Helvetica", "", 7)
+            
+            val_str = str(val)
+            font_size = 7
+            if len(val_str) > 30:
+                font_size = 5.5
+            elif len(val_str) > 24:
+                font_size = 6
+                
+            pdf.set_font("Helvetica", "", font_size)
             pdf.set_xy(57, y_pos)
-            pdf.cell(45, 4, str(val))
+            pdf.cell(45, 4, val_str)
             pdf.set_font("Helvetica", "B", 7)
             
         for idx, (label, val) in enumerate(right_specs):
             y_pos = 81 + (idx * 5)
             pdf.set_xy(107, y_pos)
             pdf.cell(45, 4, label + ":")
-            pdf.set_font("Helvetica", "", 7)
+            
+            val_str = str(val)
+            font_size = 7
+            if len(val_str) > 30:
+                font_size = 5.5
+            elif len(val_str) > 24:
+                font_size = 6
+                
+            pdf.set_font("Helvetica", "", font_size)
             pdf.set_xy(152, y_pos)
-            pdf.cell(45, 4, str(val))
+            pdf.cell(45, 4, val_str)
             pdf.set_font("Helvetica", "B", 7)
             
         pdf.rect(10, 126, 190, 20)
@@ -563,6 +572,38 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
         pdf.set_font("Helvetica", "", 6.5)
         pdf.set_xy(22, 127)
         pdf.multi_cell(176, 3, clean(detay_data.get("not", "")))
+        
+        # Draw signature block at the bottom of page 2
+        pdf.set_y(155)
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_text_color(245, 158, 11)
+        pdf.cell(0, 6, "KASE VE IMZA ONAY ALANI", ln=True)
+        pdf.set_draw_color(245, 158, 11)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(3)
+        
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font('Helvetica', 'B', 9)
+        y_start = pdf.get_y()
+        
+        pdf.set_xy(15, y_start)
+        pdf.cell(80, 5, "AS43 GRUP LAZER & METAL", ln=True, align='C')
+        pdf.set_x(15)
+        pdf.set_font('Helvetica', '', 8)
+        pdf.cell(80, 4, "(Firma Kase & Yetkili Imza)", ln=True, align='C')
+        pdf.ln(12)
+        pdf.set_x(15)
+        pdf.cell(80, 4, "____________________________", ln=True, align='C')
+        
+        pdf.set_xy(110, y_start)
+        pdf.set_font('Helvetica', 'B', 9)
+        pdf.cell(80, 5, clean(musteri_adi), ln=True, align='C')
+        pdf.set_xy(110, pdf.get_y())
+        pdf.set_font('Helvetica', '', 8)
+        pdf.cell(80, 4, "(Alici Firma Kase & Imza)", ln=True, align='C')
+        pdf.ln(12)
+        pdf.set_xy(110, pdf.get_y())
+        pdf.cell(80, 4, "____________________________", ln=True, align='C')
         
     out = pdf.output(dest='S')
     if isinstance(out, str):
