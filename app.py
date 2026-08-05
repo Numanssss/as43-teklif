@@ -543,7 +543,7 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     # ----------------------------------------------------
     # SIGNATURE BLOCK (Unified bottom of page 1)
     # ----------------------------------------------------
-    y_sig = 195 if has_specs else 92
+    y_sig = pdf.get_y() + 8
     
     pdf.set_y(y_sig)
     pdf.set_font('Helvetica', 'B', 8.5)
