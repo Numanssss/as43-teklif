@@ -225,33 +225,33 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     
     class PDF(FPDF):
         def header(self):
-            if self.page_no() == 1:
-                if os.path.exists("logo.png"):
-                    self.set_fill_color(30, 41, 59)
-                    self.rect(10, 8, 32, 14, 'F')
-                    self.image("logo.png", 11, 9, 30)
-                    self.set_x(45)
-                    self.set_font('Helvetica', 'B', 14)
-                    self.set_text_color(217, 119, 6)
-                    self.cell(0, 8, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='L')
-                    self.set_x(45)
-                    self.set_font('Helvetica', '', 9)
-                    self.set_text_color(100, 116, 139)
-                    self.cell(0, 5, 'Teklif & Operasyon Hizmetleri Detay Formu', ln=True, align='L')
-                else:
-                    self.set_font('Helvetica', 'B', 15)
-                    self.set_text_color(217, 119, 6)
-                    self.cell(0, 10, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='C')
-                    
-                self.set_draw_color(217, 119, 6)
-                self.line(10, 27, 200, 27)
-                self.ln(8)
+            # One-page unified header
+            logo_path = "asansor_logo.png" if os.path.exists("asansor_logo.png") else ("logo.png" if os.path.exists("logo.png") else "")
+            if logo_path:
+                self.image(logo_path, 10, 6, 35, 13)
+            else:
+                self.set_font('Helvetica', 'B', 12)
+                self.set_text_color(245, 158, 11)
+                self.set_xy(10, 8)
+                self.cell(35, 10, "AS43 GRUP", align="L")
+                
+            self.set_xy(48, 6)
+            self.set_font('Helvetica', 'B', 12)
+            self.set_text_color(245, 158, 11)
+            self.cell(0, 6, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='L')
+            self.set_x(48)
+            self.set_font('Helvetica', '', 8)
+            self.set_text_color(100, 116, 139)
+            self.cell(0, 4, 'Sac Kesim, Bukum, Operasyon ve Asansor Imalat Raporu', ln=True, align='L')
+            
+            self.set_draw_color(245, 158, 11)
+            self.line(10, 21, 200, 21)
             
         def footer(self):
-            self.set_y(-25)
-            self.set_font('Helvetica', 'I', 8)
+            self.set_y(-12)
+            self.set_font('Helvetica', 'I', 7)
             self.set_text_color(148, 163, 184)
-            self.cell(0, 10, f'Sayfa {self.page_no()}/{{nb}} | AS43 ERP Raporlama Hizmeti', align='C')
+            self.cell(0, 5, 'AS43 ERP Raporlama ve Teklif Hizmetleri | Sayfa 1/1', align='C')
 
     def clean(t):
         if not t: return ""
@@ -270,204 +270,163 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.alias_nb_pages()
     pdf.add_page()
     
-    pdf.set_font('Helvetica', 'B', 10)
+    # Document Metadata (Right aligned in Header space)
     pdf.set_text_color(30, 41, 59)
-    pdf.cell(0, 5, f"Teklif No: {clean(teklif_no)}", ln=True, align='R')
-    pdf.set_font('Helvetica', '', 9)
-    pdf.cell(0, 5, f"Hazirlayan: {clean(hazirlayan)}", ln=True, align='R')
-    pdf.cell(0, 5, f"Tarih: {datetime.date.today().strftime('%d.%m.%Y')}", ln=True, align='R')
-    pdf.ln(3)
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.set_xy(145, 5)
+    pdf.cell(55, 4.5, f"Teklif No: {clean(teklif_no)}", ln=True, align='R')
+    pdf.set_font('Helvetica', '', 7.5)
+    pdf.set_x(145)
+    pdf.cell(55, 4, f"Tarih: {datetime.date.today().strftime('%d.%m.%Y')}", ln=True, align='R')
+    pdf.set_x(145)
+    pdf.cell(55, 4, f"Hazirlayan: {clean(hazirlayan)}", ln=True, align='R')
     
-    pdf.set_font('Helvetica', 'B', 12)
-    pdf.set_text_color(217, 119, 6)
-    pdf.cell(0, 8, "MUSTERI VE HESAP BILGILERI", ln=True)
-    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-    pdf.set_text_color(0, 0, 0)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.ln(2)
+    has_specs = detay_data and images_paths
     
-    pdf.cell(50, 6, "Musteri Adi:", 0)
+    if has_specs:
+        pdf.set_x(145)
+        pdf.cell(55, 4, "Dokuman No: ONY-FRM-026 | Rev: 1", ln=True, align='R')
+        
+    pdf.ln(5)
+    
+    # Customer Details Block
     pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(0, 6, clean(musteri_adi), 0, 1)
-    pdf.set_font('Helvetica', '', 10)
-    
-    pdf.cell(50, 6, "Urun Sablonu:", 0)
-    pdf.cell(0, 6, clean(sablon), 0, 1)
-    
-    pdf.cell(50, 6, "Sac Malzeme Tipi:", 0)
-    pdf.cell(0, 6, f"{clean(secilen_sac)} ({sac_kalinligi} mm)", 0, 1)
-    
-    pdf.cell(50, 6, "Net Agirlik:", 0)
-    pdf.cell(0, 6, f"{net_agirlik:.2f} kg (Fire Orani: %{fire_orani:.0f})", 0, 1)
-    pdf.ln(4)
-    
-    pdf.set_font('Helvetica', 'B', 11)
-    pdf.set_text_color(217, 119, 6)
-    pdf.cell(0, 8, "MALIYET VE OPERASYON DETAYLARI", ln=True)
+    pdf.set_text_color(245, 158, 11)
+    pdf.cell(0, 6, "MUSTERI VE TEKLIF BILGILERI", ln=True)
+    pdf.set_draw_color(245, 158, 11)
     pdf.line(10, pdf.get_y(), 200, pdf.get_y())
     pdf.set_text_color(0, 0, 0)
     pdf.ln(2)
     
-    pdf.set_fill_color(217, 119, 6)
+    # Left column details
+    pdf.set_font('Helvetica', '', 8.5)
+    pdf.set_xy(12, pdf.get_y())
+    pdf.cell(40, 5, "Musteri Adi:")
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.cell(60, 5, clean(musteri_adi))
+    
+    # Right column details
+    pdf.set_font('Helvetica', '', 8.5)
+    pdf.set_xy(110, pdf.get_y() - 5)
+    pdf.cell(40, 5, "Sac Tipi & Kalinlik:")
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.cell(50, 5, f"{clean(secilen_sac)} ({sac_kalinligi} mm)", ln=True)
+    
+    # Line 2 details
+    pdf.set_font('Helvetica', '', 8.5)
+    pdf.set_xy(12, pdf.get_y())
+    pdf.cell(40, 5, "Urun Sablonu:")
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.cell(60, 5, clean(sablon))
+    
+    pdf.set_font('Helvetica', '', 8.5)
+    pdf.set_xy(110, pdf.get_y() - 5)
+    pdf.cell(40, 5, "Net Agirlik & Fire:")
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.cell(50, 5, f"{net_agirlik:.2f} kg (Fire: %{fire_orani:.0f})", ln=True)
+    
+    pdf.ln(2)
+    
+    # Costs Table
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.set_text_color(245, 158, 11)
+    pdf.cell(0, 6, "MALIYET VE OPERASYON DETAYLARI", ln=True)
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(2.5)
+    
+    # Table Header
+    pdf.set_fill_color(245, 158, 11)
     pdf.set_text_color(255, 255, 255)
-    pdf.set_font('Helvetica', 'B', 9)
-    pdf.cell(85, 7, "   Maliyet Kalemi / Operasyon", 1, 0, 'L', fill=True)
-    pdf.cell(50, 7, "Detay", 1, 0, 'C', fill=True)
-    pdf.cell(55, 7, "Tutar (EUR)  ", 1, 1, 'R', fill=True)
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.cell(85, 6.5, "   Maliyet Kalemi / Operasyon", 1, 0, 'L', fill=True)
+    pdf.cell(50, 6.5, "Detay", 1, 0, 'C', fill=True)
+    pdf.cell(55, 6.5, "Tutar (EUR)  ", 1, 1, 'R', fill=True)
     
     pdf.set_text_color(0, 0, 0)
-    pdf.set_font('Helvetica', '', 9)
+    pdf.set_font('Helvetica', '', 8.5)
+    pdf.set_fill_color(255, 251, 240) # Light cream fill
     
-    pdf.cell(85, 6, "   Hammadde Maliyeti", 1, 0, 'L')
-    pdf.cell(50, 6, f"{net_agirlik:.1f} kg", 1, 0, 'C')
-    pdf.cell(55, 6, f"{hammadde_maliyeti_eur:.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(85, 5.5, "   Hammadde Maliyeti", 1, 0, 'L', fill=True)
+    pdf.cell(50, 5.5, f"{net_agirlik:.1f} kg", 1, 0, 'C', fill=True)
+    pdf.cell(55, 5.5, f"{hammadde_maliyeti_eur:.2f} EUR  ", 1, 1, 'R', fill=True)
     
-    pdf.cell(85, 6, "   Lazer Kesim Maliyeti (Birim Dk)", 1, 0, 'L')
-    pdf.cell(50, 6, f"{lazer_suresi:.1f} dk", 1, 0, 'C')
-    pdf.cell(55, 6, f"{lazer_maliyeti_eur:.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(85, 5.5, "   Lazer Kesim Maliyeti (Birim Dk)", 1, 0, 'L', fill=False)
+    pdf.cell(50, 5.5, f"{lazer_suresi:.1f} dk", 1, 0, 'C', fill=False)
+    pdf.cell(55, 5.5, f"{lazer_maliyeti_eur:.2f} EUR  ", 1, 1, 'R', fill=False)
     
-    pdf.cell(85, 6, "   Bukum Maliyeti (Birim Dk)", 1, 0, 'L')
-    pdf.cell(50, 6, f"{bukum_suresi:.1f} dk", 1, 0, 'C')
-    pdf.cell(55, 6, f"{bukum_maliyeti_eur:.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(85, 5.5, "   Bukum Maliyeti (Birim Dk)", 1, 0, 'L', fill=True)
+    pdf.cell(50, 5.5, f"{bukum_suresi:.1f} dk", 1, 0, 'C', fill=True)
+    pdf.cell(55, 5.5, f"{bukum_maliyeti_eur:.2f} EUR  ", 1, 1, 'R', fill=True)
     
-    pdf.cell(85, 6, "   Iscilik & Montaj Maliyeti (Birim Dk)", 1, 0, 'L')
-    pdf.cell(50, 6, f"{iscilik_suresi:.1f} dk", 1, 0, 'C')
-    pdf.cell(55, 6, f"{iscilik_maliyeti_eur:.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(85, 5.5, "   Iscilik & Montaj Maliyeti (Birim Dk)", 1, 0, 'L', fill=False)
+    pdf.cell(50, 5.5, f"{iscilik_suresi:.1f} dk", 1, 0, 'C', fill=False)
+    pdf.cell(55, 5.5, f"{iscilik_maliyeti_eur:.2f} EUR  ", 1, 1, 'R', fill=False)
     
-    pdf.cell(85, 6, f"   Enerji & Sabit Giderler Payi (%{sabit_gider_payi})", 1, 0, 'L')
-    pdf.cell(50, 6, "", 1, 0, 'C')
-    pdf.cell(55, 6, f"{sabit_gider_maliyeti_eur:.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(85, 5.5, f"   Enerji & Sabit Giderler Payi (%{sabit_gider_payi})", 1, 0, 'L', fill=True)
+    pdf.cell(50, 5.5, "", 1, 0, 'C', fill=True)
+    pdf.cell(55, 5.5, f"{sabit_gider_maliyeti_eur:.2f} EUR  ", 1, 1, 'R', fill=True)
     
-    pdf.set_font('Helvetica', 'B', 9)
-    pdf.cell(135, 7, "Toplam Net Maliyet:  ", 1, 0, 'R')
-    pdf.cell(55, 7, f"{toplam_maliyet_eur:.2f} EUR  ", 1, 1, 'R')
+    # Totals rows
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.cell(135, 6, "Toplam Net Maliyet:  ", 1, 0, 'R')
+    pdf.cell(55, 6, f"{toplam_maliyet_eur:.2f} EUR  ", 1, 1, 'R')
     
-    pdf.cell(135, 6, f"Liste Satis Fiyati (Brut):  ", 1, 0, 'R')
-    pdf.cell(55, 6, f"{liste_fiyati_eur:.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(135, 5.5, "Liste Satis Fiyati (Brut):  ", 1, 0, 'R')
+    pdf.cell(55, 5.5, f"{liste_fiyati_eur:.2f} EUR  ", 1, 1, 'R')
     
-    pdf.cell(135, 6, f"Uygulanan Iskonto (%{iskonto_orani}):  ", 1, 0, 'R')
-    pdf.cell(55, 6, f"- {iskonto_tutari_eur:.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(135, 5.5, f"Uygulanan Iskonto (%{iskonto_orani}):  ", 1, 0, 'R')
+    pdf.cell(55, 5.5, f"- {iskonto_tutari_eur:.2f} EUR  ", 1, 1, 'R')
     
-    pdf.cell(135, 6, f"KDV Dahil Olmayan Ara Toplam:  ", 1, 0, 'R')
-    pdf.cell(55, 6, f"{(liste_fiyati_eur - iskonto_tutari_eur):.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(135, 5.5, "KDV Dahil Olmayan Ara Toplam:  ", 1, 0, 'R')
+    pdf.cell(55, 5.5, f"{(liste_fiyati_eur - iskonto_tutari_eur):.2f} EUR  ", 1, 1, 'R')
     
-    pdf.cell(135, 6, f"KDV (%{kdv_orani}):  ", 1, 0, 'R')
-    pdf.cell(55, 6, f"{kdv_tutari_eur:.2f} EUR  ", 1, 1, 'R')
+    pdf.cell(135, 5.5, f"KDV (%{kdv_orani}):  ", 1, 0, 'R')
+    pdf.cell(55, 5.5, f"{kdv_tutari_eur:.2f} EUR  ", 1, 1, 'R')
     
-    pdf.set_fill_color(254, 243, 199)
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.set_text_color(217, 119, 6)
-    pdf.cell(135, 9, "GENEL TOPLAM (KDV DAHIL):  ", 1, 0, 'R', fill=True)
-    pdf.cell(55, 9, f"{genel_toplam_eur:.2f} EUR  ", 1, 1, 'R', fill=True)
+    # Grand Total
+    pdf.set_fill_color(255, 237, 204) # Soft orange fill
+    pdf.set_text_color(245, 158, 11)
+    pdf.set_font('Helvetica', 'B', 9.5)
+    pdf.cell(135, 8.5, "GENEL TOPLAM (KDV DAHIL):  ", 1, 0, 'R', fill=True)
+    pdf.cell(55, 8.5, f"{genel_toplam_eur:.2f} EUR  ", 1, 1, 'R', fill=True)
     
     pdf.set_text_color(0, 0, 0)
-    pdf.set_font('Helvetica', 'I', 8.5)
-    pdf.cell(0, 6, f"Euro Kuru: {active_rate:.2f} TRY | TL Karsiligi: {(genel_toplam_eur * active_rate):,.2f} TL", ln=True, align='R')
-    pdf.ln(8)
+    pdf.set_font('Helvetica', 'I', 7.5)
+    pdf.cell(0, 5, f"Euro Kuru: {active_rate:.2f} TRY | TL Karsiligi: {(genel_toplam_eur * active_rate):,.2f} TL", ln=True, align='R')
     
-    if not (detay_data and images_paths):
-        pdf.set_y(-55)
-        pdf.set_font('Helvetica', 'B', 10)
-        pdf.set_text_color(245, 158, 11)
-        pdf.cell(0, 6, "KASE VE IMZA ONAY ALANI", ln=True)
-        pdf.set_draw_color(245, 158, 11)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(3)
+    # ----------------------------------------------------
+    # SECTION FOR ELEVATOR MODELS & SPECS (Only if active)
+    # ----------------------------------------------------
+    if has_specs:
+        pdf.ln(2.5)
         
-        pdf.set_text_color(0, 0, 0)
-        pdf.set_font('Helvetica', 'B', 9)
-        y_start = pdf.get_y()
-        
-        pdf.set_xy(15, y_start)
-        pdf.cell(80, 5, "AS43 GRUP LAZER & METAL", ln=True, align='C')
-        pdf.set_x(15)
-        pdf.set_font('Helvetica', '', 8)
-        pdf.cell(80, 4, "(Firma Kase & Yetkili Imza)", ln=True, align='C')
-        pdf.ln(12)
-        pdf.set_x(15)
-        pdf.cell(80, 4, "____________________________", ln=True, align='C')
-        
-        pdf.set_xy(110, y_start)
-        pdf.set_font('Helvetica', 'B', 9)
-        pdf.cell(80, 5, clean(musteri_adi), ln=True, align='C')
-        pdf.set_xy(110, pdf.get_y())
-        pdf.set_font('Helvetica', '', 8)
-        pdf.cell(80, 4, "(Alici Firma Kase & Imza)", ln=True, align='C')
-        pdf.ln(12)
-        pdf.set_xy(110, pdf.get_y())
-        pdf.cell(80, 4, "____________________________", ln=True, align='C')
-    
-    if detay_data and images_paths:
-        pdf.add_page()
-        pdf.set_draw_color(245, 158, 11)
-        pdf.set_line_width(0.3)
-        pdf.rect(10, 10, 190, 22)
-        pdf.line(75, 10, 75, 32)
-        
-        logo_path = "asansor_logo.png" if os.path.exists("asansor_logo.png") else ("logo.png" if os.path.exists("logo.png") else "")
-        if logo_path:
-            pdf.set_fill_color(255, 243, 219)
-            pdf.rect(10, 10, 65, 22, 'F')
-            pdf.rect(10, 10, 65, 22)
-            pdf.image(logo_path, 12, 13, 61)
-        else:
-            pdf.set_font("Helvetica", "B", 14)
-            pdf.set_xy(12, 18)
-            pdf.set_text_color(245, 158, 11)
-            pdf.cell(63, 8, "AS43 GRUP", align="C")
-            pdf.set_text_color(0, 0, 0)
-            
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.set_text_color(245, 158, 11)
-        pdf.set_xy(75, 15)
-        pdf.cell(70, 12, "ASANSOR IMALAT TEKLIF EKI", align="C")
-        pdf.set_text_color(0, 0, 0)
-        
-        pdf.line(145, 10, 145, 32)
-        pdf.line(145, 15.5, 200, 15.5)
-        pdf.line(145, 21, 200, 21)
-        pdf.line(145, 26.5, 200, 26.5)
-        pdf.line(175, 10, 175, 21)
-        pdf.line(175, 26.5, 175, 32)
-        
-        pdf.set_font("Helvetica", "B", 5.5)
-        pdf.set_xy(146, 11)
-        pdf.cell(28, 4, "DOKUMAN NO: ONY-FRM-026")
-        pdf.set_xy(176, 11)
-        pdf.cell(24, 4, "REV. NO: 1")
-        
-        pdf.set_xy(146, 16.5)
-        pdf.cell(50, 4, "YAYIN TARIHI: 15.12.2022")
-        
-        pdf.set_xy(146, 22)
-        pdf.cell(50, 4, "REVIZYON TARIHI: 01.06.2023")
-        
-        pdf.set_xy(146, 27.5)
-        pdf.cell(28, 4, "SAYFA NO: 2 / 2")
-        
+        # 1. Models Header
         pdf.set_fill_color(245, 158, 11)
-        pdf.rect(10, 32, 190, 5, 'F')
-        pdf.rect(10, 32, 190, 5)
-        pdf.line(57.5, 32, 57.5, 37)
-        pdf.line(105, 32, 105, 37)
-        pdf.line(152.5, 32, 152.5, 37)
+        pdf.rect(10, pdf.get_y(), 190, 4.5, 'F')
+        pdf.rect(10, pdf.get_y(), 190, 4.5)
+        pdf.line(57.5, pdf.get_y(), 57.5, pdf.get_y() + 4.5)
+        pdf.line(105, pdf.get_y(), 105, pdf.get_y() + 4.5)
+        pdf.line(152.5, pdf.get_y(), 152.5, pdf.get_y() + 4.5)
         
         pdf.set_font("Helvetica", "B", 7)
         pdf.set_text_color(255, 255, 255)
-        pdf.set_xy(10, 32)
-        pdf.cell(47.5, 5, "TABAN MODELI RESMI", align="C")
-        pdf.set_xy(57.5, 32)
-        pdf.cell(47.5, 5, "KABIN MODELI RESMI", align="C")
-        pdf.set_xy(105, 32)
-        pdf.cell(47.5, 5, "TAVAN MODELI RESMI", align="C")
-        pdf.set_xy(152.5, 32)
-        pdf.cell(47.5, 5, "KUYU KESITI / OZEL", align="C")
+        y_hdr = pdf.get_y()
+        pdf.set_xy(10, y_hdr)
+        pdf.cell(47.5, 4.5, "TABAN MODELI RESMI", align="C")
+        pdf.set_xy(57.5, y_hdr)
+        pdf.cell(47.5, 4.5, "KABIN MODELI RESMI", align="C")
+        pdf.set_xy(105, y_hdr)
+        pdf.cell(47.5, 4.5, "TAVAN MODELI RESMI", align="C")
+        pdf.set_xy(152.5, y_hdr)
+        pdf.cell(47.5, 4.5, "KUYU KESITI / OZEL", align="C")
         pdf.set_text_color(0, 0, 0)
         
-        pdf.rect(10, 37, 190, 30)
-        pdf.line(57.5, 37, 57.5, 67)
-        pdf.line(105, 37, 105, 67)
-        pdf.line(152.5, 37, 152.5, 67)
+        # 2. Image boxes
+        pdf.rect(10, y_hdr + 4.5, 190, 20)
+        pdf.line(57.5, y_hdr + 4.5, 57.5, y_hdr + 24.5)
+        pdf.line(105, y_hdr + 4.5, 105, y_hdr + 24.5)
+        pdf.line(152.5, y_hdr + 4.5, 152.5, y_hdr + 24.5)
         
         image_keys = ["taban", "kabin", "tavan", "kuyu"]
         for idx, key in enumerate(image_keys):
@@ -475,39 +434,43 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
             x_start = 10 + (idx * 47.5)
             if img_path and os.path.exists(img_path):
                 try:
-                    pdf.image(img_path, x_start + 2, 38, 43.5, 28)
+                    pdf.image(img_path, x_start + 2.5, y_hdr + 5.5, 42.5, 18)
                 except Exception:
                     pass
-                
-        pdf.rect(10, 67, 190, 6)
-        pdf.line(57.5, 67, 57.5, 73)
-        pdf.line(105, 67, 105, 73)
-        pdf.line(152.5, 67, 152.5, 73)
-        pdf.set_font("Helvetica", "B", 6.5)
+                    
+        # 3. Model labels
+        pdf.rect(10, y_hdr + 24.5, 190, 5)
+        pdf.line(57.5, y_hdr + 24.5, 57.5, y_hdr + 29.5)
+        pdf.line(105, y_hdr + 24.5, 105, y_hdr + 29.5)
+        pdf.line(152.5, y_hdr + 24.5, 152.5, y_hdr + 29.5)
         
-        pdf.set_xy(10, 68)
+        pdf.set_font("Helvetica", "B", 6)
+        pdf.set_xy(10, y_hdr + 25)
         pdf.cell(47.5, 4, clean(f"Doseme: {detay_data.get('taban_modeli', '')}"), align="C")
-        pdf.set_xy(57.5, 68)
+        pdf.set_xy(57.5, y_hdr + 25)
         pdf.cell(47.5, 4, clean(f"Kabin: {detay_data.get('dim_kabin', 'Olcu Yok')}"), align="C")
-        pdf.set_xy(105, 68)
+        pdf.set_xy(105, y_hdr + 25)
         pdf.cell(47.5, 4, clean(f"Tavan: {detay_data.get('tavan_modeli', '')}"), align="C")
-        pdf.set_xy(152.5, 68)
+        pdf.set_xy(152.5, y_hdr + 25)
         pdf.cell(47.5, 4, clean(f"Kuyu: {detay_data.get('dim_kuyu', 'Olcu Yok')}"), align="C")
         
+        # 4. Specifications
+        pdf.ln(5.5)
         pdf.set_fill_color(245, 158, 11)
-        pdf.rect(10, 75, 190, 5, 'F')
-        pdf.rect(10, 75, 190, 5)
+        pdf.rect(10, pdf.get_y(), 190, 4.5, 'F')
+        pdf.rect(10, pdf.get_y(), 190, 4.5)
         pdf.set_font("Helvetica", "B", 8)
         pdf.set_text_color(255, 255, 255)
-        pdf.set_xy(10, 75)
-        pdf.cell(190, 5, "TEKNIK ASANSOR SPECIFIKASYONLARI", align="C")
+        pdf.set_xy(10, pdf.get_y())
+        pdf.cell(190, 4.5, "TEKNIK ASANSOR SPECIFIKASYONLARI", align="C")
         pdf.set_text_color(0, 0, 0)
         
-        pdf.rect(10, 80, 190, 45)
-        pdf.line(105, 80, 105, 125)
-        for i in range(1, 9):
-            y_line = 80 + (i * 5)
-            pdf.line(10, y_line, 200, y_line)
+        y_spec_start = pdf.get_y() + 4.5
+        pdf.rect(10, y_spec_start, 190, 28)
+        pdf.line(105, y_spec_start, 105, y_spec_start + 28)
+        for i in range(1, 8):
+            y_l = y_spec_start + (i * 3.5)
+            pdf.line(10, y_l, 200, y_l)
             
         left_specs = [
             ("Kapasite", clean(detay_data.get("kapasite", "")) + " kg"),
@@ -530,81 +493,87 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
             ("Ayna Yeri ve Olcusu", clean(detay_data.get("ayna_detay", "")))
         ]
         
-        pdf.set_font("Helvetica", "B", 7)
+        pdf.set_font("Helvetica", "B", 6.5)
         for idx, (label, val) in enumerate(left_specs):
-            y_pos = 81 + (idx * 5)
+            y_pos = y_spec_start + 0.5 + (idx * 3.5)
             pdf.set_xy(12, y_pos)
-            pdf.cell(45, 4, label + ":")
+            pdf.cell(45, 3, label + ":")
             
             val_str = str(val)
-            font_size = 7
+            font_size = 6.5
             if len(val_str) > 30:
-                font_size = 5.5
+                font_size = 5.2
             elif len(val_str) > 24:
-                font_size = 6
+                font_size = 5.8
                 
             pdf.set_font("Helvetica", "", font_size)
-            pdf.set_xy(57, y_pos)
-            pdf.cell(45, 4, val_str)
-            pdf.set_font("Helvetica", "B", 7)
+            pdf.set_xy(54, y_pos)
+            pdf.cell(45, 3, val_str)
+            pdf.set_font("Helvetica", "B", 6.5)
             
         for idx, (label, val) in enumerate(right_specs):
-            y_pos = 81 + (idx * 5)
+            y_pos = y_spec_start + 0.5 + (idx * 3.5)
             pdf.set_xy(107, y_pos)
-            pdf.cell(45, 4, label + ":")
+            pdf.cell(45, 3, label + ":")
             
             val_str = str(val)
-            font_size = 7
+            font_size = 6.5
             if len(val_str) > 30:
-                font_size = 5.5
+                font_size = 5.2
             elif len(val_str) > 24:
-                font_size = 6
+                font_size = 5.8
                 
             pdf.set_font("Helvetica", "", font_size)
-            pdf.set_xy(152, y_pos)
-            pdf.cell(45, 4, val_str)
-            pdf.set_font("Helvetica", "B", 7)
+            pdf.set_xy(149, y_pos)
+            pdf.cell(45, 3, val_str)
+            pdf.set_font("Helvetica", "B", 6.5)
             
-        pdf.rect(10, 126, 190, 20)
-        pdf.set_font("Helvetica", "B", 7)
-        pdf.set_xy(12, 127)
-        pdf.cell(10, 4, "NOT:")
-        pdf.set_font("Helvetica", "", 6.5)
-        pdf.set_xy(22, 127)
-        pdf.multi_cell(176, 3, clean(detay_data.get("not", "")))
+        # 5. Note
+        pdf.set_xy(10, y_spec_start + 28.5)
+        pdf.rect(10, pdf.get_y(), 190, 10)
+        pdf.set_font("Helvetica", "B", 6.5)
+        pdf.set_xy(12, pdf.get_y() + 0.5)
+        pdf.cell(10, 3, "NOT:")
+        pdf.set_font("Helvetica", "", 6)
+        pdf.set_xy(22, pdf.get_y())
+        pdf.multi_cell(176, 2.5, clean(detay_data.get("not", "")))
         
-        # Draw signature block at the bottom of page 2
-        pdf.set_y(155)
-        pdf.set_font('Helvetica', 'B', 10)
-        pdf.set_text_color(245, 158, 11)
-        pdf.cell(0, 6, "KASE VE IMZA ONAY ALANI", ln=True)
-        pdf.set_draw_color(245, 158, 11)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(3)
-        
-        pdf.set_text_color(0, 0, 0)
-        pdf.set_font('Helvetica', 'B', 9)
-        y_start = pdf.get_y()
-        
-        pdf.set_xy(15, y_start)
-        pdf.cell(80, 5, "AS43 GRUP LAZER & METAL", ln=True, align='C')
-        pdf.set_x(15)
-        pdf.set_font('Helvetica', '', 8)
-        pdf.cell(80, 4, "(Firma Kase & Yetkili Imza)", ln=True, align='C')
-        pdf.ln(12)
-        pdf.set_x(15)
-        pdf.cell(80, 4, "____________________________", ln=True, align='C')
-        
-        pdf.set_xy(110, y_start)
-        pdf.set_font('Helvetica', 'B', 9)
-        pdf.cell(80, 5, clean(musteri_adi), ln=True, align='C')
-        pdf.set_xy(110, pdf.get_y())
-        pdf.set_font('Helvetica', '', 8)
-        pdf.cell(80, 4, "(Alici Firma Kase & Imza)", ln=True, align='C')
-        pdf.ln(12)
-        pdf.set_xy(110, pdf.get_y())
-        pdf.cell(80, 4, "____________________________", ln=True, align='C')
-        
+    # ----------------------------------------------------
+    # SIGNATURE BLOCK (Unified bottom of page 1)
+    # ----------------------------------------------------
+    y_sig = 195 if has_specs else 92
+    
+    pdf.set_y(y_sig)
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.set_text_color(245, 158, 11)
+    pdf.cell(0, 5, "KASE VE IMZA ONAY ALANI", ln=True)
+    pdf.set_draw_color(245, 158, 11)
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+    pdf.ln(2.5)
+    
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font('Helvetica', 'B', 8.5)
+    y_start = pdf.get_y()
+    
+    pdf.set_xy(15, y_start)
+    pdf.cell(80, 4, "AS43 GRUP LAZER & METAL", ln=True, align='C')
+    pdf.set_x(15)
+    pdf.set_font('Helvetica', '', 7.5)
+    pdf.cell(80, 3.5, "(Firma Kase & Yetkili Imza)", ln=True, align='C')
+    pdf.ln(9)
+    pdf.set_x(15)
+    pdf.cell(80, 3.5, "____________________________", ln=True, align='C')
+    
+    pdf.set_xy(110, y_start)
+    pdf.set_font('Helvetica', 'B', 8.5)
+    pdf.cell(80, 4, clean(musteri_adi), ln=True, align='C')
+    pdf.set_xy(110, pdf.get_y())
+    pdf.set_font('Helvetica', '', 7.5)
+    pdf.cell(80, 3.5, "(Alici Firma Kase & Imza)", ln=True, align='C')
+    pdf.ln(9)
+    pdf.set_xy(110, pdf.get_y())
+    pdf.cell(80, 3.5, "____________________________", ln=True, align='C')
+    
     out = pdf.output(dest='S')
     if isinstance(out, str):
         return out.encode('latin1')
