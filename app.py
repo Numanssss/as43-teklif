@@ -159,7 +159,7 @@ st.markdown("""
         border: 2px solid #F59E0B;
         border-radius: 14px;
         padding: 1.5rem;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }
     
     /* Şeffaf Logo Stili */
@@ -225,26 +225,27 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     
     class PDF(FPDF):
         def header(self):
-            if os.path.exists("logo.png"):
-                self.set_fill_color(30, 41, 59)
-                self.rect(10, 8, 32, 14, 'F')
-                self.image("logo.png", 11, 9, 30)
-                self.set_x(45)
-                self.set_font('Helvetica', 'B', 14)
-                self.set_text_color(217, 119, 6)
-                self.cell(0, 8, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='L')
-                self.set_x(45)
-                self.set_font('Helvetica', '', 9)
-                self.set_text_color(100, 116, 139)
-                self.cell(0, 5, 'Teklif & Operasyon Hizmetleri Detay Formu', ln=True, align='L')
-            else:
-                self.set_font('Helvetica', 'B', 15)
-                self.set_text_color(217, 119, 6)
-                self.cell(0, 10, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='C')
-                
-            self.set_draw_color(217, 119, 6)
-            self.line(10, 27, 200, 27)
-            self.ln(8)
+            if self.page_no() == 1:
+                if os.path.exists("logo.png"):
+                    self.set_fill_color(30, 41, 59)
+                    self.rect(10, 8, 32, 14, 'F')
+                    self.image("logo.png", 11, 9, 30)
+                    self.set_x(45)
+                    self.set_font('Helvetica', 'B', 14)
+                    self.set_text_color(217, 119, 6)
+                    self.cell(0, 8, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='L')
+                    self.set_x(45)
+                    self.set_font('Helvetica', '', 9)
+                    self.set_text_color(100, 116, 139)
+                    self.cell(0, 5, 'Teklif & Operasyon Hizmetleri Detay Formu', ln=True, align='L')
+                else:
+                    self.set_font('Helvetica', 'B', 15)
+                    self.set_text_color(217, 119, 6)
+                    self.cell(0, 10, 'AS43 GRUP LAZER & METAL ERP', ln=True, align='C')
+                    
+                self.set_draw_color(217, 119, 6)
+                self.line(10, 27, 200, 27)
+                self.ln(8)
             
         def footer(self):
             self.set_y(-25)
@@ -364,6 +365,7 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.cell(0, 6, f"Euro Kuru: {active_rate:.2f} TRY | TL Karsiligi: {(genel_toplam_eur * active_rate):,.2f} TL", ln=True, align='R')
     pdf.ln(8)
     
+    pdf.set_y(-55)
     pdf.set_font('Helvetica', 'B', 10)
     pdf.set_text_color(217, 119, 6)
     pdf.cell(0, 6, "KASE VE IMZA ONAY ALANI", ln=True)
@@ -1061,7 +1063,7 @@ def generate_asansor_imalat_pdf(data, images):
     deliveries = [
         ("Kabin(ler)", data.get("tarih_kabin", ""), data.get("desc_kabin", "")),
         ("Sase ve Pudreller", data.get("tarih_sase", ""), data.get("desc_sase", "")),
-        ("Kapilar", data.get("tarih_kapi", ""), data.get("desc_kapi", "")),
+        ("Kapilar", data.get("tarih_kapilar", ""), data.get("desc_kapilar", "")),
         ("Pano(lar)", data.get("tarih_pano", ""), data.get("desc_pano", ""))
     ]
     pdf.set_font("Helvetica", "", 7)
@@ -1278,10 +1280,10 @@ if not st.session_state["authenticated"]:
             if submit_login:
                 is_valid = False
                 if username_input in USER_DB:
-                     correct_password = USER_PASSWORDS[username_input]
-                     if password_input == correct_password or hash_password(password_input) == USER_DB[username_input]:
-                         is_valid = True
-                 
+                    correct_password = USER_PASSWORDS[username_input]
+                    if password_input == correct_password or hash_password(password_input) == USER_DB[username_input]:
+                        is_valid = True
+                
                 if is_valid:
                     st.session_state["authenticated"] = True
                     st.query_params["user"] = username_input
@@ -1297,7 +1299,7 @@ if not st.session_state["authenticated"]:
                     st.rerun()
                 else:
                     st.error("Hatalı Kullanıcı Adı veya Şifre!")
-         
+        
         st.markdown("<p style='font-size:0.75rem; color:#64748b; margin-top:20px; text-align:center;'>Yetki veya şifre sıfırlama taleplerinizi sistem yöneticisine bildiriniz.</p>", unsafe_allow_html=True)
     st.stop()
 
@@ -1530,6 +1532,7 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
         
         st.markdown("<br>", unsafe_allow_html=True)
         
+        # NameError Hatasını Düzeltmek İçin Kayıt ve PDF Oluşturma İşlemleri Düzgünce Kapsüllendi
         if st.button("💾 Teklifi Kaydet ve PDF Oluştur"):
             teklif_no = f"AS43-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
             yeni_teklif = {
@@ -1602,7 +1605,7 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                 replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
                 for k, v in replacements.items(): t = t.replace(k, v)
                 return t
- 
+
             st.download_button(
                 label="📥 Resmi PDF Teklif Belgesini İndir",
                 data=pdf_bytes,
@@ -1660,7 +1663,7 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
         
     with col_e2:
         st.subheader("🚪 Kapı, Kumanda ve Diğer Bilgiler")
-        kapi_gen_yuk = st.text_input("Kapı Giriş Genişlik x Yükseklik:", value="150 X 210")
+        kapi_gen_yuk = st.text_input("Kapı Genişlik x Yükseklik:", value="150 X 210")
         kabin_kapi_adedi = st.text_input("Kabin Kapı Adedi (örn: TEK GİRİŞ):", value="TEK GİRİŞ")
         kapi_model = st.text_input("Kapı Modeli (Kabin):", value="ÇARPMA")
         kat_kapi_adedi = st.text_input("Kat Kapı Adedi:", value="YOK")
@@ -1670,7 +1673,7 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
         kasa_kaplama = st.text_input("Kasa Kaplama:", value="YOK")
         panel_kaplama = st.text_input("Panel Kaplama:", value="YOK")
         kapi_not = st.text_input("Kapı Notu:", value="YOK")
-         
+        
         st.markdown("---")
         pano_adet = st.text_input("Pano Adet:", value="1")
         pano_guc = st.text_input("Pano Güç:", value="Standart")
@@ -1680,12 +1683,12 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
         pano_salt = st.text_input("Şalt Malzeme:", value="YOK")
         pano_konum = st.text_input("Konum Yeri:", value="YOK")
         pano_not = st.text_input("Pano Notu:", value="YOK")
-         
+        
         st.markdown("---")
         st.subheader("📝 İmzalar ve Teslimat")
         musteri_temsilcisi = st.text_input("Müşteri Temsilcisi Adı Soyadı:", value=st.session_state.get("username", "Ahmet Bey"))
         imalat_muduru = st.text_input("İmalat Müdürü Adı Soyadı:", value="Mehmet Usta")
-         
+        
         col_t1, col_t2 = st.columns(2)
         with col_t1:
             tarih_kabin = st.text_input("Kabin Teslim Tarihi:", value="-")
@@ -1697,12 +1700,12 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
             desc_sase = st.text_input("Şase Açıklama:", value="-")
             desc_kapilar = st.text_input("Kapılar Açıklama:", value="-")
             desc_pano = st.text_input("Pano Açıklama:", value="-")
-             
+            
         genel_not = st.text_area("Özel Form Notu (Ortada Görünen):", value="HİDROLİK ASANSÖR SADECE KABİN KOVASI YAPILACAKTIR. 150 CM GENİŞLİK 85 CM DERİNLİK OLACAKTIR.")
- 
+
     st.markdown("---")
     st.subheader("🖼️ Görsel Girişleri ve Alt Ölçü Bilgileri")
-     
+    
     col_img1, col_img2, col_img3, col_img4 = st.columns(4)
     with col_img1:
         st.markdown("**1. TABAN MODELİ**")
@@ -1720,7 +1723,7 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
         st.markdown("**4. KUYU KESİTİ / ÖZEL ÇİZİM**")
         file_kuyu = st.file_uploader("Kuyu/Özel Görseli:", type=["png", "jpg", "jpeg"], key="up_kuyu")
         dim_kuyu = st.text_input("Kuyu Ölçü Bilgisi (Kuyu Genişlik x Derinlik):", value="170 X 124 cm", key="in_dim_kuyu")
- 
+
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("💾 İmalat Teklif Belgesi (PDF) Oluştur", use_container_width=True):
         images_paths = {}
@@ -1731,10 +1734,10 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
                     images_paths[k] = tmp.name
             else:
                 images_paths[k] = None
-                 
+                
         # Parse Genişlik x Derinlik or details
         kabin_gen_der = f"{dim_kabin}"
-         
+        
         pdf_data = {
             "firma": firma,
             "referans": referans,
@@ -1793,25 +1796,25 @@ elif secilen_modul == "🛗 Asansör İmalat Teklif Formu":
             "imalat_muduru": imalat_muduru,
             "tarih_kabin": tarih_kabin,
             "tarih_sase": tarih_sase,
-            "tarih_kapi": tarih_kapilar,
+            "tarih_kapilar": tarih_kapilar,
             "tarih_pano": tarih_pano,
             "desc_kabin": desc_kabin,
             "desc_sase": desc_sase,
-            "desc_kapi": desc_kapilar,
+            "desc_kapilar": desc_kapilar,
             "desc_pano": desc_pano
         }
-         
+        
         try:
             pdf_bytes_imalat = generate_asansor_imalat_pdf(pdf_data, images_paths)
             st.success("İmalat teklif formu başarıyla hazırlandı!")
-             
+            
             def clean_name_sb(t):
                 if not t: return ""
                 t = str(t)
                 replacements = {'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C'}
                 for k, v in replacements.items(): t = t.replace(k, v)
                 return t
-                 
+                
             st.download_button(
                 label="📥 Resmi İmalat Teklif PDF Dosyasını İndir",
                 data=pdf_bytes_imalat,
