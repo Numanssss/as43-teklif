@@ -1479,7 +1479,7 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
 
             with col_cost2:
                 st.markdown("**Büküm**")
-                bukum_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, value=st.session_state["bukum_eur_val"], format="%.4f", step=0.05, key="bukum_widget_eur", on_change=update_bukum_from_eur)
+                bukum_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, value=st.session_state["bukum_eur_val"], format="%.4f", step=0.05, key="bukum_eur_widget", on_change=update_bukum_from_eur)
                 bukum_try_val = st.number_input("TL / Dakika:", min_value=0.00, value=st.session_state["bukum_eur_val"] * active_rate, format="%.2f", step=1.0, key="bukum_try_widget", on_change=update_bukum_from_try)
 
             with col_cost3:
