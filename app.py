@@ -1408,6 +1408,22 @@ if "custom_rate" not in st.session_state:
 
 active_rate = st.session_state["live_rate"] if st.session_state["exchange_mode"] == "Canlı" else st.session_state["custom_rate"]
 
+# Initialize widget keys early at the script level to prevent KeyError in callbacks during reruns
+if "lazer_eur_widget" not in st.session_state:
+    st.session_state["lazer_eur_widget"] = 1.3300
+if "lazer_try_widget" not in st.session_state:
+    st.session_state["lazer_try_widget"] = 1.3300 * active_rate
+    
+if "bukum_eur_widget" not in st.session_state:
+    st.session_state["bukum_eur_widget"] = 0.6600
+if "bukum_try_widget" not in st.session_state:
+    st.session_state["bukum_try_widget"] = 0.6600 * active_rate
+    
+if "iscilik_eur_widget" not in st.session_state:
+    st.session_state["iscilik_eur_widget"] = 0.2500
+if "iscilik_try_widget" not in st.session_state:
+    st.session_state["iscilik_try_widget"] = 0.2500 * active_rate
+
 # --- SOL MENÜ (SIDEBAR) BÖLÜMÜ ---
 st.sidebar.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
 
@@ -1554,37 +1570,27 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                     st.session_state["iscilik_try_widget"] = st.session_state["iscilik_eur_widget"] * active_rate
                 st.session_state["last_active_rate"] = active_rate
                 
-            # Init state values
-            if "lazer_eur_widget" not in st.session_state:
-                st.session_state["lazer_eur_widget"] = 1.3300
-            if "lazer_try_widget" not in st.session_state:
-                st.session_state["lazer_try_widget"] = 1.3300 * active_rate
-                
-            if "bukum_eur_widget" not in st.session_state:
-                st.session_state["bukum_eur_widget"] = 0.6600
-            if "bukum_try_widget" not in st.session_state:
-                st.session_state["bukum_try_widget"] = 0.6600 * active_rate
-                
-            if "iscilik_eur_widget" not in st.session_state:
-                st.session_state["iscilik_eur_widget"] = 0.2500
-            if "iscilik_try_widget" not in st.session_state:
-                st.session_state["iscilik_try_widget"] = 0.2500 * active_rate
-                
-            # Callback functions for bi-directional updates
+            # Callback functions for bi-directional updates with safety checks
             def update_lazer_from_try():
-                st.session_state["lazer_eur_widget"] = st.session_state["lazer_try_widget"] / active_rate if active_rate > 0 else 0.0
+                if "lazer_try_widget" in st.session_state:
+                    st.session_state["lazer_eur_widget"] = st.session_state["lazer_try_widget"] / active_rate if active_rate > 0 else 0.0
             def update_lazer_from_eur():
-                st.session_state["lazer_try_widget"] = st.session_state["lazer_eur_widget"] * active_rate
+                if "lazer_eur_widget" in st.session_state:
+                    st.session_state["lazer_try_widget"] = st.session_state["lazer_eur_widget"] * active_rate
 
             def update_bukum_from_try():
-                st.session_state["bukum_eur_widget"] = st.session_state["bukum_try_widget"] / active_rate if active_rate > 0 else 0.0
+                if "bukum_try_widget" in st.session_state:
+                    st.session_state["bukum_eur_widget"] = st.session_state["bukum_try_widget"] / active_rate if active_rate > 0 else 0.0
             def update_bukum_from_eur():
-                st.session_state["bukum_try_widget"] = st.session_state["bukum_eur_widget"] * active_rate
+                if "bukum_eur_widget" in st.session_state:
+                    st.session_state["bukum_try_widget"] = st.session_state["bukum_eur_widget"] * active_rate
 
             def update_iscilik_from_try():
-                st.session_state["iscilik_eur_widget"] = st.session_state["iscilik_try_widget"] / active_rate if active_rate > 0 else 0.0
+                if "iscilik_try_widget" in st.session_state:
+                    st.session_state["iscilik_eur_widget"] = st.session_state["iscilik_try_widget"] / active_rate if active_rate > 0 else 0.0
             def update_iscilik_from_eur():
-                st.session_state["iscilik_try_widget"] = st.session_state["iscilik_eur_widget"] * active_rate
+                if "iscilik_eur_widget" in st.session_state:
+                    st.session_state["iscilik_try_widget"] = st.session_state["iscilik_eur_widget"] * active_rate
 
             col_cost1, col_cost2, col_cost3 = st.columns(3)
             
