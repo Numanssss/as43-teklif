@@ -207,6 +207,13 @@ st.markdown("""
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 15px -3px rgba(249, 115, 22, 0.3) !important;
     }
+    [data-testid="stSidebar"] div.stButton {
+        width: 100% !important;
+    }
+    [data-testid="stSidebar"] div.stButton > button {
+        width: 100% !important;
+        display: block !important;
+    }
     
     /* Durum Etiketleri */
     .badge {
@@ -1333,10 +1340,10 @@ if not st.session_state["authenticated"]:
 # --- ANLIK EUR/TRY DÖVİZ ENTEGRASYONU ---
 @st.cache_data(ttl=60)
 def get_live_eur_rate():
-    # 1. GenelPara API (Turkey market & TCMB real-time rates)
+    # 1. GenelPara API (Turkish free market)
     try:
         url = "https://api.genelpara.com/embed/para-birimleri.json"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
         with urllib.request.urlopen(req, timeout=4) as response:
             res_data = json.loads(response.read().decode())
             if "EUR" in res_data and "satis" in res_data["EUR"]:
@@ -1346,17 +1353,51 @@ def get_live_eur_rate():
     except Exception:
         pass
 
-    # 2. Open ER-API (fallback)
+    # 2. ExchangeRate-API V4 (real-time free API, frequently updated)
+    try:
+        url = "https://api.exchangerate-api.com/v4/latest/EUR"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+        with urllib.request.urlopen(req, timeout=4) as response:
+            res_data = json.loads(response.read().decode())
+            if "rates" in res_data and "TRY" in res_data["rates"]:
+                val = float(res_data["rates"]["TRY"])
+                if val > 10:
+                    return val
+    except Exception:
+        pass
+
+    # 3. TCMB (Central Bank of Turkey) Official XML
+    try:
+        import xml.etree.ElementTree as ET
+        url = "https://www.tcmb.gov.tr/kurlar/today.xml"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+        with urllib.request.urlopen(req, timeout=4) as response:
+            xml_data = response.read()
+            root = ET.fromstring(xml_data)
+            for currency in root.findall('Currency'):
+                if currency.get('CurrencyCode') == 'EUR':
+                    forex_selling = currency.find('ForexSelling').text
+                    if forex_selling:
+                        val = float(forex_selling)
+                        if val > 10:
+                            return val
+    except Exception:
+        pass
+
+    # 4. Open ER-API (fallback)
     try:
         url = "https://open.er-api.com/v6/latest/EUR"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
         with urllib.request.urlopen(req, timeout=4) as response:
             res_data = json.loads(response.read().decode())
             if res_data.get("result") == "success":
-                return float(res_data["rates"]["TRY"])
+                val = float(res_data["rates"]["TRY"])
+                if val > 10:
+                    return val
     except Exception:
         pass
-    return 55.00
+
+    return 55.10
 
 if "exchange_mode" not in st.session_state:
     st.session_state["exchange_mode"] = "Canlı"
@@ -1412,9 +1453,10 @@ else:
     active_rate = st.session_state["live_rate"]
 
 st.sidebar.markdown(
-    f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; text-align: center;'><span style='font-size: 0.8rem; color:#94a3b8; font-weight:600;'>AKTİF EUR/TRY KURU</span><br>"
-    f"<span style='font-size: 1.4rem; font-weight: 800; color: #22c55e;'>{active_rate:.4f} TL</span><br>"
-    f"<span style='font-size: 0.75rem; color:#f59e0b;'>Mod: {cur_mode}</span>"
+    f"<div style='background: #ffffff; border: 1.5px solid #f97316; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(249, 115, 22, 0.05);'>"
+    f"<span style='font-size: 0.75rem; color:#64748b; font-weight:600; text-transform: uppercase; letter-spacing: 0.05em;'>AKTİF EUR/TRY KURU</span><br>"
+    f"<span style='font-size: 1.6rem; font-weight: 850; color: #ea580c;'>{active_rate:.4f} TL</span><br>"
+    f"<span style='font-size: 0.75rem; color:#94a3b8; font-weight:500;'>Mod: {cur_mode}</span>"
     f"</div>", 
     unsafe_allow_html=True
 )
