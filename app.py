@@ -1372,10 +1372,20 @@ secilen_modul = st.sidebar.radio(
 st.sidebar.markdown("---")
 
 st.sidebar.markdown("#### 💶 EUR/TRY Döviz Kuru")
+cur_mode = st.sidebar.selectbox("Kur Modu:", ["Canlı", "Manuel"], index=0 if st.session_state["exchange_mode"] == "Canlı" else 1)
+st.session_state["exchange_mode"] = cur_mode
+
+if cur_mode == "Manuel":
+    manuel_kur = st.sidebar.number_input("Manuel Kur (TL):", min_value=1.0, value=float(st.session_state["custom_rate"]), step=0.1)
+    st.session_state["custom_rate"] = manuel_kur
+    active_rate = manuel_kur
+else:
+    active_rate = st.session_state["live_rate"]
+
 st.sidebar.markdown(
     f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; text-align: center;'><span style='font-size: 0.8rem; color:#94a3b8; font-weight:600;'>AKTİF EUR/TRY KURU</span><br>"
     f"<span style='font-size: 1.4rem; font-weight: 800; color: #22c55e;'>{active_rate:.4f} TL</span><br>"
-    f"<span style='font-size: 0.75rem; color:#f59e0b;'>Mod: {st.session_state['exchange_mode']}</span>"
+    f"<span style='font-size: 0.75rem; color:#f59e0b;'>Mod: {cur_mode}</span>"
     f"</div>", 
     unsafe_allow_html=True
 )
@@ -1924,16 +1934,7 @@ elif secilen_modul == "⚙️ Sistem Ayarları & Sac Fiyatları":
     st.markdown("<div class='main-subtitle'>Hammadde Birim Maliyetleri ve Kur Yönetimi</div>", unsafe_allow_html=True)
     
     st.subheader("💶 Döviz Kuru Ayarları")
-    col_cur1, col_cur2 = st.columns(2)
-    with col_cur1:
-        kur_modu = st.radio("Döviz Kuru Modu:", ["Canlı", "Manuel"], index=0 if st.session_state["exchange_mode"] == "Canlı" else 1)
-        st.session_state["exchange_mode"] = kur_modu
-    with col_cur2:
-        if kur_modu == "Manuel":
-            manuel_kur = st.number_input("Manuel EUR/TRY Kuru:", min_value=1.0, value=float(st.session_state["custom_rate"]), step=0.1)
-            st.session_state["custom_rate"] = manuel_kur
-        else:
-            st.info(f"Canlı kur aktif (Open ER-API). Güncel kur: {st.session_state['live_rate']:.4f} TL")
+    st.info("Döviz kuru ve kur modu (Canlı/Manuel) ayarlarını sol menüdeki (Sidebar) küresel panel üzerinden istediğiniz an değiştirebilirsiniz.")
             
     st.markdown("---")
     st.subheader("🛠️ Sac Malzeme Birim Fiyatları (EUR / kg)")
