@@ -1331,8 +1331,22 @@ if not st.session_state["authenticated"]:
     st.stop()
 
 # --- ANLIK EUR/TRY DÖVİZ ENTEGRASYONU ---
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=60)
 def get_live_eur_rate():
+    # 1. GenelPara API (Turkey market & TCMB real-time rates)
+    try:
+        url = "https://api.genelpara.com/embed/para-birimleri.json"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=4) as response:
+            res_data = json.loads(response.read().decode())
+            if "EUR" in res_data and "satis" in res_data["EUR"]:
+                val = float(res_data["EUR"]["satis"].replace(",", "."))
+                if val > 10:
+                    return val
+    except Exception:
+        pass
+
+    # 2. Open ER-API (fallback)
     try:
         url = "https://open.er-api.com/v6/latest/EUR"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -1404,6 +1418,13 @@ st.sidebar.markdown(
     f"</div>", 
     unsafe_allow_html=True
 )
+
+if cur_mode == "Canlı":
+    if st.sidebar.button("🔄 Canlı Kuru Yenile", key="btn_refresh_rate"):
+        st.cache_data.clear() # Clear Streamlit cache
+        st.session_state["live_rate"] = get_live_eur_rate()
+        st.toast("Döviz kuru piyasadan başarıyla güncellendi!", icon="✅")
+        st.rerun()
 
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
 if st.sidebar.button("🔓 Güvenli Çıkış Yap", key="btn_logout"):
