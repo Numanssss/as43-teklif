@@ -1447,50 +1447,56 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
             st.markdown("##### 💶 Birim Dakika Maliyetleri (Çift Para Birimli - EUR / TL)")
             
             # Init state values
-            if "lazer_eur" not in st.session_state:
-                st.session_state["lazer_eur"] = 1.3300
-                st.session_state["lazer_try"] = 1.3300 * active_rate
-            if "bukum_eur" not in st.session_state:
-                st.session_state["bukum_eur"] = 0.6600
-                st.session_state["bukum_try"] = 0.6600 * active_rate
-            if "iscilik_eur" not in st.session_state:
-                st.session_state["iscilik_eur"] = 0.2500
-                st.session_state["iscilik_try"] = 0.2500 * active_rate
-                
-            def update_lazer_try():
-                st.session_state["lazer_try"] = st.session_state["lazer_eur_input"] * active_rate
-                st.session_state["lazer_eur"] = st.session_state["lazer_eur_input"]
-            def update_lazer_eur():
-                st.session_state["lazer_eur"] = st.session_state["lazer_try_input"] / active_rate if active_rate > 0 else 0.0
-                st.session_state["lazer_try"] = st.session_state["lazer_try_input"]
-                
-            def update_bukum_try():
-                st.session_state["bukum_try"] = st.session_state["bukum_eur_input"] * active_rate
-                st.session_state["bukum_eur"] = st.session_state["bukum_eur_input"]
-            def update_bukum_eur():
-                st.session_state["bukum_eur"] = st.session_state["bukum_try_input"] / active_rate if active_rate > 0 else 0.0
-                st.session_state["bukum_try"] = st.session_state["bukum_try_input"]
-                
-            def update_iscilik_try():
-                st.session_state["iscilik_try"] = st.session_state["iscilik_eur_input"] * active_rate
-                st.session_state["iscilik_eur"] = st.session_state["iscilik_eur_input"]
-            def update_iscilik_eur():
-                st.session_state["iscilik_eur"] = st.session_state["iscilik_try_input"] / active_rate if active_rate > 0 else 0.0
-                st.session_state["iscilik_try"] = st.session_state["iscilik_try_input"]
+            if "lazer_eur_val" not in st.session_state:
+                st.session_state["lazer_eur_val"] = 1.3300
+            if "bukum_eur_val" not in st.session_state:
+                st.session_state["bukum_eur_val"] = 0.6600
+            if "iscilik_eur_val" not in st.session_state:
+                st.session_state["iscilik_eur_val"] = 0.2500
                 
             col_cost1, col_cost2, col_cost3 = st.columns(3)
+            
             with col_cost1:
                 st.markdown("**Lazer Kesim**")
-                lazer_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, key="lazer_eur_input", value=st.session_state["lazer_eur"], on_change=update_lazer_try, format="%.4f", step=0.05)
-                lazer_try_val = st.number_input("TL / Dakika:", min_value=0.00, key="lazer_try_input", value=st.session_state["lazer_try"], on_change=update_lazer_eur, format="%.2f", step=1.0)
+                lazer_eur_in = st.number_input("EUR / Dakika:", min_value=0.00, value=st.session_state["lazer_eur_val"], format="%.4f", step=0.05, key="lazer_eur_w")
+                lazer_try_in = st.number_input("TL / Dakika:", min_value=0.00, value=lazer_eur_in * active_rate, format="%.2f", step=1.0, key="lazer_try_w")
+                
+                # Check for changes
+                if abs(lazer_try_in - (st.session_state["lazer_eur_val"] * active_rate)) > 0.05:
+                    st.session_state["lazer_eur_val"] = lazer_try_in / active_rate if active_rate > 0 else 0.0
+                    st.rerun()
+                elif abs(lazer_eur_in - st.session_state["lazer_eur_val"]) > 0.0001:
+                    st.session_state["lazer_eur_val"] = lazer_eur_in
+                    st.rerun()
+                lazer_dakika_maliyet = st.session_state["lazer_eur_val"]
+
             with col_cost2:
                 st.markdown("**Büküm**")
-                bukum_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, key="bukum_eur_input", value=st.session_state["bukum_eur"], on_change=update_bukum_try, format="%.4f", step=0.05)
-                bukum_try_val = st.number_input("TL / Dakika:", min_value=0.00, key="bukum_try_input", value=st.session_state["bukum_try"], on_change=update_bukum_eur, format="%.2f", step=1.0)
+                bukum_eur_in = st.number_input("EUR / Dakika:", min_value=0.00, value=st.session_state["bukum_eur_val"], format="%.4f", step=0.05, key="bukum_eur_w")
+                bukum_try_in = st.number_input("TL / Dakika:", min_value=0.00, value=bukum_eur_in * active_rate, format="%.2f", step=1.0, key="bukum_try_w")
+                
+                # Check for changes
+                if abs(bukum_try_in - (st.session_state["bukum_eur_val"] * active_rate)) > 0.05:
+                    st.session_state["bukum_eur_val"] = bukum_try_in / active_rate if active_rate > 0 else 0.0
+                    st.rerun()
+                elif abs(bukum_eur_in - st.session_state["bukum_eur_val"]) > 0.0001:
+                    st.session_state["bukum_eur_val"] = bukum_eur_in
+                    st.rerun()
+                bukum_dakika_maliyet = st.session_state["bukum_eur_val"]
+
             with col_cost3:
                 st.markdown("**İşçilik & Montaj**")
-                iscilik_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, key="iscilik_eur_input", value=st.session_state["iscilik_eur"], on_change=update_iscilik_try, format="%.4f", step=0.05)
-                iscilik_try_val = st.number_input("TL / Dakika:", min_value=0.00, key="iscilik_try_input", value=st.session_state["iscilik_try"], on_change=update_iscilik_eur, format="%.2f", step=1.0)
+                iscilik_eur_in = st.number_input("EUR / Dakika:", min_value=0.00, value=st.session_state["iscilik_eur_val"], format="%.4f", step=0.05, key="iscilik_eur_w")
+                iscilik_try_in = st.number_input("TL / Dakika:", min_value=0.00, value=iscilik_eur_in * active_rate, format="%.2f", step=1.0, key="iscilik_try_w")
+                
+                # Check for changes
+                if abs(iscilik_try_in - (st.session_state["iscilik_eur_val"] * active_rate)) > 0.05:
+                    st.session_state["iscilik_eur_val"] = iscilik_try_in / active_rate if active_rate > 0 else 0.0
+                    st.rerun()
+                elif abs(iscilik_eur_in - st.session_state["iscilik_eur_val"]) > 0.0001:
+                    st.session_state["iscilik_eur_val"] = iscilik_eur_in
+                    st.rerun()
+                iscilik_dakika_maliyet = st.session_state["iscilik_eur_val"]
                 
             st.markdown("##### 📈 Kar, İskonto & KDV")
             col_m1, col_m2, col_m3 = st.columns(3)
