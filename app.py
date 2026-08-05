@@ -285,7 +285,7 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     
     if has_specs:
         pdf.set_x(145)
-        pdf.cell(55, 4, "Dokuman No: ONY-FRM-026 | Rev: 1", ln=True, align='R')
+        pdf.cell(55, 4, "Dokuman No: AS43-FRM-026 | Rev: 1", ln=True, align='R')
         
     pdf.ln(5)
     
@@ -640,7 +640,7 @@ def generate_asansor_imalat_pdf(data, images):
     pdf.cell(24, 4, "REVIZYON NO")
     pdf.set_font("Helvetica", "", 7)
     pdf.set_xy(163, 11)
-    pdf.cell(10, 4, "ONY-FRM-026")
+    pdf.cell(10, 4, "AS43-FRM-026")
     pdf.set_xy(193, 11)
     pdf.cell(10, 4, "1")
     
@@ -1327,7 +1327,7 @@ def get_live_eur_rate():
                 return float(res_data["rates"]["TRY"])
     except Exception:
         pass
-    return 38.50
+    return 55.00
 
 if "exchange_mode" not in st.session_state:
     st.session_state["exchange_mode"] = "Canlı"
@@ -1444,14 +1444,53 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
             with col_time3:
                 iscilik_suresi = st.number_input("Montaj/İşçilik Süresi (dk):", min_value=0.0, value=60.0, step=10.0)
                 
-            st.markdown("##### 💶 Birim Dakika Maliyetleri (EUR / Dakika)")
+            st.markdown("##### 💶 Birim Dakika Maliyetleri (Çift Para Birimli - EUR / TL)")
+            
+            # Init state values
+            if "lazer_eur" not in st.session_state:
+                st.session_state["lazer_eur"] = 1.3300
+                st.session_state["lazer_try"] = 1.3300 * active_rate
+            if "bukum_eur" not in st.session_state:
+                st.session_state["bukum_eur"] = 0.6600
+                st.session_state["bukum_try"] = 0.6600 * active_rate
+            if "iscilik_eur" not in st.session_state:
+                st.session_state["iscilik_eur"] = 0.2500
+                st.session_state["iscilik_try"] = 0.2500 * active_rate
+                
+            def update_lazer_try():
+                st.session_state["lazer_try"] = st.session_state["lazer_eur_input"] * active_rate
+                st.session_state["lazer_eur"] = st.session_state["lazer_eur_input"]
+            def update_lazer_eur():
+                st.session_state["lazer_eur"] = st.session_state["lazer_try_input"] / active_rate if active_rate > 0 else 0.0
+                st.session_state["lazer_try"] = st.session_state["lazer_try_input"]
+                
+            def update_bukum_try():
+                st.session_state["bukum_try"] = st.session_state["bukum_eur_input"] * active_rate
+                st.session_state["bukum_eur"] = st.session_state["bukum_eur_input"]
+            def update_bukum_eur():
+                st.session_state["bukum_eur"] = st.session_state["bukum_try_input"] / active_rate if active_rate > 0 else 0.0
+                st.session_state["bukum_try"] = st.session_state["bukum_try_input"]
+                
+            def update_iscilik_try():
+                st.session_state["iscilik_try"] = st.session_state["iscilik_eur_input"] * active_rate
+                st.session_state["iscilik_eur"] = st.session_state["iscilik_eur_input"]
+            def update_iscilik_eur():
+                st.session_state["iscilik_eur"] = st.session_state["iscilik_try_input"] / active_rate if active_rate > 0 else 0.0
+                st.session_state["iscilik_try"] = st.session_state["iscilik_try_input"]
+                
             col_cost1, col_cost2, col_cost3 = st.columns(3)
             with col_cost1:
-                lazer_dakika_maliyet = st.number_input("Lazer / Dakika (EUR):", min_value=0.00, value=1.33, step=0.05, format="%.4f")
+                st.markdown("**Lazer Kesim**")
+                lazer_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, key="lazer_eur_input", value=st.session_state["lazer_eur"], on_change=update_lazer_try, format="%.4f", step=0.05)
+                lazer_try_val = st.number_input("TL / Dakika:", min_value=0.00, key="lazer_try_input", value=st.session_state["lazer_try"], on_change=update_lazer_eur, format="%.2f", step=1.0)
             with col_cost2:
-                bukum_dakika_maliyet = st.number_input("Büküm / Dakika (EUR):", min_value=0.00, value=0.66, step=0.05, format="%.4f")
+                st.markdown("**Büküm**")
+                bukum_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, key="bukum_eur_input", value=st.session_state["bukum_eur"], on_change=update_bukum_try, format="%.4f", step=0.05)
+                bukum_try_val = st.number_input("TL / Dakika:", min_value=0.00, key="bukum_try_input", value=st.session_state["bukum_try"], on_change=update_bukum_eur, format="%.2f", step=1.0)
             with col_cost3:
-                iscilik_dakika_maliyet = st.number_input("İşçilik / Dakika (EUR):", min_value=0.00, value=0.25, step=0.05, format="%.4f")
+                st.markdown("**İşçilik & Montaj**")
+                iscilik_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, key="iscilik_eur_input", value=st.session_state["iscilik_eur"], on_change=update_iscilik_try, format="%.4f", step=0.05)
+                iscilik_try_val = st.number_input("TL / Dakika:", min_value=0.00, key="iscilik_try_input", value=st.session_state["iscilik_try"], on_change=update_iscilik_eur, format="%.2f", step=1.0)
                 
             st.markdown("##### 📈 Kar, İskonto & KDV")
             col_m1, col_m2, col_m3 = st.columns(3)
