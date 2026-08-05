@@ -298,34 +298,36 @@ def generate_pdf(teklif_no, hazirlayan, musteri_adi, sablon, secilen_sac, sac_ka
     pdf.set_text_color(0, 0, 0)
     pdf.ln(2)
     
-    # Left column details
+    y_detail = pdf.get_y() + 3
+    
+    # Line 1 details
+    pdf.set_xy(12, y_detail)
     pdf.set_font('Helvetica', '', 8.5)
-    pdf.set_xy(12, pdf.get_y())
-    pdf.cell(40, 5, "Musteri Adi:")
+    pdf.cell(35, 5, "Musteri Adi:")
     pdf.set_font('Helvetica', 'B', 8.5)
     pdf.cell(60, 5, clean(musteri_adi))
     
-    # Right column details
+    pdf.set_xy(110, y_detail)
     pdf.set_font('Helvetica', '', 8.5)
-    pdf.set_xy(110, pdf.get_y() - 5)
-    pdf.cell(40, 5, "Sac Tipi & Kalinlik:")
+    pdf.cell(35, 5, "Sac Tipi & Kalinlik:")
     pdf.set_font('Helvetica', 'B', 8.5)
-    pdf.cell(50, 5, f"{clean(secilen_sac)} ({sac_kalinligi} mm)", ln=True)
+    pdf.cell(50, 5, f"{clean(secilen_sac)} ({sac_kalinligi} mm)")
     
     # Line 2 details
+    y_detail += 5.5
+    pdf.set_xy(12, y_detail)
     pdf.set_font('Helvetica', '', 8.5)
-    pdf.set_xy(12, pdf.get_y())
-    pdf.cell(40, 5, "Urun Sablonu:")
+    pdf.cell(35, 5, "Urun Sablonu:")
     pdf.set_font('Helvetica', 'B', 8.5)
     pdf.cell(60, 5, clean(sablon))
     
+    pdf.set_xy(110, y_detail)
     pdf.set_font('Helvetica', '', 8.5)
-    pdf.set_xy(110, pdf.get_y() - 5)
-    pdf.cell(40, 5, "Net Agirlik & Fire:")
+    pdf.cell(35, 5, "Net Agirlik & Fire:")
     pdf.set_font('Helvetica', 'B', 8.5)
-    pdf.cell(50, 5, f"{net_agirlik:.2f} kg (Fire: %{fire_orani:.0f})", ln=True)
+    pdf.cell(50, 5, f"{net_agirlik:.2f} kg (Fire: %{fire_orani:.0f})")
     
-    pdf.ln(2)
+    pdf.set_y(y_detail + 8)
     
     # Costs Table
     pdf.set_font('Helvetica', 'B', 10)
