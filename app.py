@@ -1316,7 +1316,7 @@ if not st.session_state["authenticated"]:
     st.stop()
 
 # --- ANLIK EUR/TRY DÖVİZ ENTEGRASYONU ---
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=300)
 def get_live_eur_rate():
     try:
         url = "https://open.er-api.com/v6/latest/EUR"
@@ -1456,46 +1456,67 @@ if secilen_modul == "✍️ Akıllı Teklif Sihirbazı":
                 
             st.markdown("##### 💶 Birim Dakika Maliyetleri (Çift Para Birimli - EUR / TL)")
             
+            # Handle exchange rate changes globally
+            if "last_active_rate" not in st.session_state:
+                st.session_state["last_active_rate"] = active_rate
+                
+            if st.session_state["last_active_rate"] != active_rate:
+                if "lazer_eur_widget" in st.session_state:
+                    st.session_state["lazer_try_widget"] = st.session_state["lazer_eur_widget"] * active_rate
+                if "bukum_eur_widget" in st.session_state:
+                    st.session_state["bukum_try_widget"] = st.session_state["bukum_eur_widget"] * active_rate
+                if "iscilik_eur_widget" in st.session_state:
+                    st.session_state["iscilik_try_widget"] = st.session_state["iscilik_eur_widget"] * active_rate
+                st.session_state["last_active_rate"] = active_rate
+                
             # Init state values
-            if "lazer_eur_val" not in st.session_state:
-                st.session_state["lazer_eur_val"] = 1.3300
-            if "bukum_eur_val" not in st.session_state:
-                st.session_state["bukum_eur_val"] = 0.6600
-            if "iscilik_eur_val" not in st.session_state:
-                st.session_state["iscilik_eur_val"] = 0.2500
+            if "lazer_eur_widget" not in st.session_state:
+                st.session_state["lazer_eur_widget"] = 1.3300
+            if "lazer_try_widget" not in st.session_state:
+                st.session_state["lazer_try_widget"] = 1.3300 * active_rate
+                
+            if "bukum_eur_widget" not in st.session_state:
+                st.session_state["bukum_eur_widget"] = 0.6600
+            if "bukum_try_widget" not in st.session_state:
+                st.session_state["bukum_try_widget"] = 0.6600 * active_rate
+                
+            if "iscilik_eur_widget" not in st.session_state:
+                st.session_state["iscilik_eur_widget"] = 0.2500
+            if "iscilik_try_widget" not in st.session_state:
+                st.session_state["iscilik_try_widget"] = 0.2500 * active_rate
                 
             # Callback functions for bi-directional updates
             def update_lazer_from_try():
-                st.session_state["lazer_eur_val"] = st.session_state["lazer_try_widget"] / active_rate if active_rate > 0 else 0.0
+                st.session_state["lazer_eur_widget"] = st.session_state["lazer_try_widget"] / active_rate if active_rate > 0 else 0.0
             def update_lazer_from_eur():
-                st.session_state["lazer_eur_val"] = st.session_state["lazer_eur_widget"]
+                st.session_state["lazer_try_widget"] = st.session_state["lazer_eur_widget"] * active_rate
 
             def update_bukum_from_try():
-                st.session_state["bukum_eur_val"] = st.session_state["bukum_try_widget"] / active_rate if active_rate > 0 else 0.0
+                st.session_state["bukum_eur_widget"] = st.session_state["bukum_try_widget"] / active_rate if active_rate > 0 else 0.0
             def update_bukum_from_eur():
-                st.session_state["bukum_eur_val"] = st.session_state["bukum_eur_widget"]
+                st.session_state["bukum_try_widget"] = st.session_state["bukum_eur_widget"] * active_rate
 
             def update_iscilik_from_try():
-                st.session_state["iscilik_eur_val"] = st.session_state["iscilik_try_widget"] / active_rate if active_rate > 0 else 0.0
+                st.session_state["iscilik_eur_widget"] = st.session_state["iscilik_try_widget"] / active_rate if active_rate > 0 else 0.0
             def update_iscilik_from_eur():
-                st.session_state["iscilik_eur_val"] = st.session_state["iscilik_eur_widget"]
+                st.session_state["iscilik_try_widget"] = st.session_state["iscilik_eur_widget"] * active_rate
 
             col_cost1, col_cost2, col_cost3 = st.columns(3)
             
             with col_cost1:
                 st.markdown("**Lazer Kesim**")
-                lazer_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, value=st.session_state["lazer_eur_val"], format="%.4f", step=0.05, key="lazer_eur_widget", on_change=update_lazer_from_eur)
-                lazer_try_val = st.number_input("TL / Dakika:", min_value=0.00, value=st.session_state["lazer_eur_val"] * active_rate, format="%.2f", step=1.0, key="lazer_try_widget", on_change=update_lazer_from_try)
+                lazer_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, format="%.4f", step=0.05, key="lazer_eur_widget", on_change=update_lazer_from_eur)
+                lazer_try_val = st.number_input("TL / Dakika:", min_value=0.00, format="%.2f", step=1.0, key="lazer_try_widget", on_change=update_lazer_from_try)
 
             with col_cost2:
                 st.markdown("**Büküm**")
-                bukum_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, value=st.session_state["bukum_eur_val"], format="%.4f", step=0.05, key="bukum_eur_widget", on_change=update_bukum_from_eur)
-                bukum_try_val = st.number_input("TL / Dakika:", min_value=0.00, value=st.session_state["bukum_eur_val"] * active_rate, format="%.2f", step=1.0, key="bukum_try_widget", on_change=update_bukum_from_try)
+                bukum_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, format="%.4f", step=0.05, key="bukum_eur_widget", on_change=update_bukum_from_eur)
+                bukum_try_val = st.number_input("TL / Dakika:", min_value=0.00, format="%.2f", step=1.0, key="bukum_try_widget", on_change=update_bukum_from_try)
 
             with col_cost3:
                 st.markdown("**İşçilik & Montaj**")
-                iscilik_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, value=st.session_state["iscilik_eur_val"], format="%.4f", step=0.05, key="iscilik_eur_widget", on_change=update_iscilik_from_eur)
-                iscilik_try_val = st.number_input("TL / Dakika:", min_value=0.00, value=st.session_state["iscilik_eur_val"] * active_rate, format="%.2f", step=1.0, key="iscilik_try_widget", on_change=update_iscilik_from_try)
+                iscilik_dakika_maliyet = st.number_input("EUR / Dakika:", min_value=0.00, format="%.4f", step=0.05, key="iscilik_eur_widget", on_change=update_iscilik_from_eur)
+                iscilik_try_val = st.number_input("TL / Dakika:", min_value=0.00, format="%.2f", step=1.0, key="iscilik_try_widget", on_change=update_iscilik_from_try)
                 
             st.markdown("##### 📈 Kar, İskonto & KDV")
             col_m1, col_m2, col_m3 = st.columns(3)
