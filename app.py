@@ -2049,11 +2049,52 @@ elif secilen_modul == "⚙️ Sistem Ayarları & Sac Fiyatları":
     st.info("Döviz kuru ve kur modu (Canlı/Manuel) ayarlarını sol menüdeki (Sidebar) küresel panel üzerinden istediğiniz an değiştirebilirsiniz.")
             
     st.markdown("---")
-    st.subheader("🛠️ Sac Malzeme Birim Fiyatları (EUR / kg)")
+    st.subheader("🛠️ Sac Malzeme Birim Fiyatları (Çift Para Birimli - EUR / TL)")
     
-    edited_sac_df = st.data_editor(df_sac_fiyatlari, use_container_width=True, num_rows="dynamic")
+    # Load original prices and compute TRY columns
+    df_sac_temp = df_sac_fiyatlari.copy()
+    df_sac_temp["Birim_Fiyat_TRY_kg"] = df_sac_temp["Birim_Fiyat_EUR_kg"] * active_rate
+    
+    # Let user edit the temporary dataframe
+    edited_sac_df = st.data_editor(
+        df_sac_temp,
+        column_config={
+            "Malzeme_Tipi": st.column_config.TextColumn("Malzeme Tipi", width="medium"),
+            "Birim_Fiyat_EUR_kg": st.column_config.NumberColumn("Birim Fiyat (EUR / kg)", format="%.4f EUR", min_value=0.0, step=0.01),
+            "Birim_Fiyat_TRY_kg": st.column_config.NumberColumn("Birim Fiyat (TL / kg)", format="%.2f TL", min_value=0.0, step=0.1),
+        },
+        use_container_width=True,
+        num_rows="dynamic",
+        key="sac_editor"
+    )
+    
+    # Synchronize columns before saving (EUR -> TRY or TRY -> EUR)
+    for idx, row in edited_sac_df.iterrows():
+        # Check if the row exists in the original data to detect edits
+        if idx in df_sac_fiyatlari.index:
+            orig_eur = df_sac_fiyatlari.loc[idx, "Birim_Fiyat_EUR_kg"]
+            edited_eur = row["Birim_Fiyat_EUR_kg"]
+            edited_try = row["Birim_Fiyat_TRY_kg"]
+            
+            # If EUR was modified, recalculate TRY
+            if abs(edited_eur - orig_eur) > 0.0001:
+                edited_sac_df.loc[idx, "Birim_Fiyat_TRY_kg"] = edited_eur * active_rate
+            # If TRY was modified, recalculate EUR
+            elif abs(edited_try - (orig_eur * active_rate)) > 0.05:
+                edited_sac_df.loc[idx, "Birim_Fiyat_EUR_kg"] = edited_try / active_rate if active_rate > 0 else 0.0
+        else:
+            # Newly added rows
+            edited_eur = row.get("Birim_Fiyat_EUR_kg", 0.0)
+            edited_try = row.get("Birim_Fiyat_TRY_kg", 0.0)
+            if edited_eur > 0 and (pd.isna(edited_try) or edited_try == 0.0):
+                edited_sac_df.loc[idx, "Birim_Fiyat_TRY_kg"] = edited_eur * active_rate
+            elif edited_try > 0 and (pd.isna(edited_eur) or edited_eur == 0.0):
+                edited_sac_df.loc[idx, "Birim_Fiyat_EUR_kg"] = edited_try / active_rate if active_rate > 0 else 0.0
+
     if st.button("Sac Fiyatlarını Kaydet"):
-        edited_sac_df.to_csv(FILE_SAC_FIYATLARI, index=False, encoding='utf-8-sig')
+        # Save only the original required columns to CSV
+        final_df = edited_sac_df[["Malzeme_Tipi", "Birim_Fiyat_EUR_kg"]].copy()
+        final_df.to_csv(FILE_SAC_FIYATLARI, index=False, encoding='utf-8-sig')
         st.success("Sac birim fiyatları başarıyla güncellendi!")
         st.rerun()
 
