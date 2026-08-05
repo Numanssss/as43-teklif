@@ -2055,7 +2055,36 @@ elif secilen_modul == "⚙️ Sistem Ayarları & Sac Fiyatları":
     df_sac_temp = df_sac_fiyatlari.copy()
     df_sac_temp["Birim_Fiyat_TRY_kg"] = df_sac_temp["Birim_Fiyat_EUR_kg"] * active_rate
     
-    # Let user edit the temporary dataframe
+    # Intercept data editor changes in session state before rendering to synchronize EUR <-> TL in real-time
+    if "sac_editor" in st.session_state:
+        editor_state = st.session_state["sac_editor"]
+        edited_rows = editor_state.get("edited_rows", {})
+        for row_str_idx, changes in list(edited_rows.items()):
+            row_idx = int(row_str_idx)
+            if row_idx in df_sac_temp.index:
+                if "Birim_Fiyat_EUR_kg" in changes and changes["Birim_Fiyat_EUR_kg"] is not None:
+                    new_eur = float(changes["Birim_Fiyat_EUR_kg"])
+                    new_try = new_eur * active_rate
+                    st.session_state["sac_editor"]["edited_rows"][row_str_idx]["Birim_Fiyat_TRY_kg"] = new_try
+                    df_sac_temp.loc[row_idx, "Birim_Fiyat_EUR_kg"] = new_eur
+                    df_sac_temp.loc[row_idx, "Birim_Fiyat_TRY_kg"] = new_try
+                elif "Birim_Fiyat_TRY_kg" in changes and changes["Birim_Fiyat_TRY_kg"] is not None:
+                    new_try = float(changes["Birim_Fiyat_TRY_kg"])
+                    new_eur = new_try / active_rate if active_rate > 0 else 0.0
+                    st.session_state["sac_editor"]["edited_rows"][row_str_idx]["Birim_Fiyat_EUR_kg"] = new_eur
+                    df_sac_temp.loc[row_idx, "Birim_Fiyat_EUR_kg"] = new_eur
+                    df_sac_temp.loc[row_idx, "Birim_Fiyat_TRY_kg"] = new_try
+                    
+        added_rows = editor_state.get("added_rows", [])
+        for i, row_data in enumerate(added_rows):
+            if "Birim_Fiyat_EUR_kg" in row_data and ("Birim_Fiyat_TRY_kg" not in row_data or row_data["Birim_Fiyat_TRY_kg"] == 0.0):
+                eur_val = float(row_data["Birim_Fiyat_EUR_kg"])
+                st.session_state["sac_editor"]["added_rows"][i]["Birim_Fiyat_TRY_kg"] = eur_val * active_rate
+            elif "Birim_Fiyat_TRY_kg" in row_data and ("Birim_Fiyat_EUR_kg" not in row_data or row_data["Birim_Fiyat_EUR_kg"] == 0.0):
+                try_val = float(row_data["Birim_Fiyat_TRY_kg"])
+                st.session_state["sac_editor"]["added_rows"][i]["Birim_Fiyat_EUR_kg"] = try_val / active_rate if active_rate > 0 else 0.0
+
+    # Let user edit the temporary synchronized dataframe
     edited_sac_df = st.data_editor(
         df_sac_temp,
         column_config={
@@ -2067,29 +2096,6 @@ elif secilen_modul == "⚙️ Sistem Ayarları & Sac Fiyatları":
         num_rows="dynamic",
         key="sac_editor"
     )
-    
-    # Synchronize columns before saving (EUR -> TRY or TRY -> EUR)
-    for idx, row in edited_sac_df.iterrows():
-        # Check if the row exists in the original data to detect edits
-        if idx in df_sac_fiyatlari.index:
-            orig_eur = df_sac_fiyatlari.loc[idx, "Birim_Fiyat_EUR_kg"]
-            edited_eur = row["Birim_Fiyat_EUR_kg"]
-            edited_try = row["Birim_Fiyat_TRY_kg"]
-            
-            # If EUR was modified, recalculate TRY
-            if abs(edited_eur - orig_eur) > 0.0001:
-                edited_sac_df.loc[idx, "Birim_Fiyat_TRY_kg"] = edited_eur * active_rate
-            # If TRY was modified, recalculate EUR
-            elif abs(edited_try - (orig_eur * active_rate)) > 0.05:
-                edited_sac_df.loc[idx, "Birim_Fiyat_EUR_kg"] = edited_try / active_rate if active_rate > 0 else 0.0
-        else:
-            # Newly added rows
-            edited_eur = row.get("Birim_Fiyat_EUR_kg", 0.0)
-            edited_try = row.get("Birim_Fiyat_TRY_kg", 0.0)
-            if edited_eur > 0 and (pd.isna(edited_try) or edited_try == 0.0):
-                edited_sac_df.loc[idx, "Birim_Fiyat_TRY_kg"] = edited_eur * active_rate
-            elif edited_try > 0 and (pd.isna(edited_eur) or edited_eur == 0.0):
-                edited_sac_df.loc[idx, "Birim_Fiyat_EUR_kg"] = edited_try / active_rate if active_rate > 0 else 0.0
 
     if st.button("Sac Fiyatlarını Kaydet"):
         # Save only the original required columns to CSV
