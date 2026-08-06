@@ -1,0 +1,6 @@
+Asansör_ID,Bina_Lokasyon,Son_Bakım_Tarihi,Gelecek_Bakım_Planı,Mevcut_Durum
+AS-101,A Blok - Merkez Ofis,2026-05-10,2026-06-10,Aktif / Güvenli
+AS-102,B Blok - AVM Girişi,2026-04-15,2026-05-15,Bakım Gerekli
+AS-103,C Blok - Rezidans,2026-05-20,2026-06-20,Aktif / Güvenli
+AS-104,D Blok - Otopark,2026-03-01,2026-04-01,Arızalı / Hizmet Dışı
+AS-201,Plaza - Yönetim Katı,2026-05-22,2026-06-22,Aktif / Güvenli
