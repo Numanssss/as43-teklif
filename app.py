@@ -36,15 +36,18 @@ def get_transparent_logo_base64():
         img = Image.open(logo_path).convert("RGBA")
         datas = img.getdata()
         new_data = []
-        # Make white background transparent and white text dark slate for light mode
+        # Make dark blue background transparent, white text dark slate, and keep orange elements intact
         for item in datas:
+            # 1. If it's already transparent, keep it transparent
             if len(item) == 4 and item[3] < 50:
                 new_data.append((255, 255, 255, 0))
-            elif item[0] > 220 and item[1] > 220 and item[2] > 220:
-                if len(item) == 4 and item[3] >= 50:
-                    new_data.append((15, 23, 42, 255))
-                else:
-                    new_data.append((255, 255, 255, 0))
+            # 2. If it's the dark blue/slate background color (typically RGB values under 35, 45, 65)
+            elif item[0] < 35 and item[1] < 45 and item[2] < 65:
+                new_data.append((255, 255, 255, 0)) # make background transparent
+            # 3. If it's the white text (RGB values over 200)
+            elif item[0] > 200 and item[1] > 200 and item[2] > 200:
+                new_data.append((15, 23, 42, 255)) # convert white text to dark slate
+            # 4. Keep other colors (like the orange emblem) unchanged
             else:
                 new_data.append(item)
         img.putdata(new_data)
